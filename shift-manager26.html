@@ -1,0 +1,3145 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITC Logistic — Pontaj</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f2f5;--sur:#ffffff;--sur2:#f5f7fa;--sur3:#e8ecf0;
+  --brd:#d0d5dd;--txt:#1a1d23;--mut:#6b7280;--dim:#4b5563;
+  --acc:#2a7a3b;--acc2:#1d5c2a;--acl:#1e8c3a;--agw:rgba(42,122,59,.12);
+  --day:#2563eb;--dayb:rgba(37,99,235,.1);
+  --ngt:#dc2626;--ngtb:rgba(220,38,38,.1);
+  --fre:#16a34a;--freb:rgba(22,163,74,.1);
+  --lv:#d97706;--lvb:rgba(217,119,6,.12);
+  --pnd:#7c3aed;--pndb:rgba(124,58,237,.12);
+  --wht:#374151;--whtb:rgba(55,65,81,.08);
+  --day:#3b82f6;--dayb:rgba(59,130,246,.15);
+  --ngt:#ef4444;--ngtb:rgba(239,68,68,.15);
+  --fre:#22c55e;--freb:rgba(34,197,94,.10);
+  --lv:#f59e0b;--lvb:rgba(245,158,11,.15);
+  --pnd:#a855f7;--pndb:rgba(168,85,247,.15);
+  --wht:#e2e8f0;--whtb:rgba(226,232,240,.08);
+  --r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+
+/* ── LOADING OVERLAY ── */
+#loadingOverlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
+#loadingOverlay .spin-lg{width:40px;height:40px;border:3px solid var(--brd);border-top-color:var(--acl);border-radius:50%;animation:spin .7s linear infinite;}
+#loadingOverlay p{font-size:14px;color:var(--mut);}
+.hidden{display:none!important;}
+
+/* ── SETUP SCREEN ── */
+#setupScreen{display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#f0f4f0 0%,#e8f0e8 100%);}
+.setup-card{background:var(--sur);border:1px solid var(--brd);border-radius:20px;padding:44px 38px;width:500px;max-width:96vw;box-shadow:0 8px 40px rgba(0,0,0,.15);}
+.setup-logo{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.setup-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--acl);margin-bottom:6px;}
+.setup-sub{font-size:13px;color:var(--mut);margin-bottom:24px;line-height:1.6;}
+.setup-steps{font-size:13px;line-height:2;color:var(--dim);background:var(--sur2);border-radius:8px;padding:14px;margin-bottom:18px;}
+.setup-steps a{color:var(--acl);}
+
+/* ── LOGIN ── */
+#loginScreen{display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#f0f4f0 0%,#e8f0e8 100%);}
+.lcard{background:var(--sur);border:1px solid var(--brd);border-radius:20px;padding:44px 38px;width:380px;box-shadow:0 8px 40px rgba(0,0,0,.15);}
+.llogo{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.llogo-text .lt1{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--acl);}
+.llogo-text .lt2{font-size:12px;color:var(--mut);}
+.lsep{height:1px;background:var(--brd);margin-bottom:20px;}
+.flbl{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.fgrp{margin-bottom:16px;}
+.fi{width:100%;background:var(--sur2);border:1px solid var(--brd);border-radius:var(--rs);padding:11px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.fi:focus{border-color:var(--acl);}
+.lerr{font-size:13px;color:var(--ngt);margin-bottom:12px;display:none;}
+.lbtn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:var(--rs);padding:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;}
+.lbtn:hover{background:var(--acl);}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh;}
+.topbar{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:#1a5c2a;border-bottom:1px solid #145022;z-index:300;align-items:center;padding:0 16px;gap:12px;}
+.topbar-logo{display:flex;align-items:center;gap:9px;flex:1;}
+.topbar-logo span{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:#fff;}
+.hbg{background:none;border:none;cursor:pointer;padding:6px;display:flex;flex-direction:column;gap:5px;}
+.hbg span{display:block;width:22px;height:2px;background:#fff;border-radius:2px;}
+.ovbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199;}
+.ovbg.show{display:block;}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:248px;background:#1a2e1e;border-right:1px solid #243d28;display:flex;flex-direction:column;z-index:200;overflow-y:auto;transition:transform .25s;}
+.shead{padding:18px 20px 14px;border-bottom:1px solid #2d4a32;flex-shrink:0;}
+.shead-inner{display:flex;align-items:center;gap:11px;}
+.shead-text .st1{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--acl);}
+.shead-text .st2{font-size:11px;color:var(--mut);}
+.nsec{padding:12px 10px 4px;flex-shrink:0;}
+.nlbl{font-size:10px;font-weight:700;color:#6b9e72;text-transform:uppercase;letter-spacing:1px;padding:0 10px 7px;display:block;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rs);cursor:pointer;font-size:14px;font-weight:500;color:#aacfae;transition:all .15s;margin-bottom:2px;user-select:none;}
+.ni:hover{background:rgba(255,255,255,.08);color:#fff;}
+.ni.active{background:rgba(255,255,255,.15);color:#fff;}
+.ni .ic{font-size:15px;width:19px;text-align:center;flex-shrink:0;}
+.sfooter{margin-top:auto;flex-shrink:0;padding:13px 17px 16px;border-top:1px solid #2d4a32;}
+.sname{font-weight:600;color:#fff;font-size:14px;margin-bottom:1px;}
+.srole{font-size:11px;color:#6dbf74;text-transform:uppercase;letter-spacing:.5px;margin-bottom:11px;}
+.logbtn{width:100%;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.28);color:#f87171;border-radius:8px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.logbtn:hover{background:rgba(239,68,68,.2);color:#ef4444;}
+
+/* ── MAIN ── */
+.main{margin-left:248px;padding:30px;background:var(--bg);min-height:100vh;}
+.page{display:none;}.page.active{display:block;}
+.phead{margin-bottom:22px;}
+.ptitle{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px;}
+.psub{font-size:14px;color:var(--mut);}
+
+/* ── CARDS ── */
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:20px;}
+.ctitle{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:13px;}
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.scard{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:17px 20px;}
+.slbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.sval{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;letter-spacing:-1px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ── CALENDAR ── */
+.calnav{display:flex;align-items:center;gap:12px;}
+.calbtn{background:var(--sur2);border:1px solid var(--brd);color:var(--txt);border-radius:8px;padding:7px 13px;cursor:pointer;font-size:14px;transition:all .15s;}
+.calbtn:hover{border-color:var(--acl);color:var(--acl);}
+.calmonth{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.caldow{text-align:center;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;padding:7px 0;letter-spacing:.5px;}
+.calcell{min-height:72px;background:var(--sur2);border:1px solid var(--brd);border-radius:7px;padding:6px;transition:border-color .15s;}
+.calcell.other{opacity:.25;}.calcell.today{border-color:var(--acl);}
+.daynum{font-size:11px;font-weight:600;color:var(--dim);margin-bottom:3px;}
+.calcell.today .daynum{color:var(--acl);}
+
+/* ── CHIPS ── */
+.chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;display:inline-block;margin-bottom:2px;}
+.cD{background:var(--dayb);color:var(--day);}
+.cN{background:var(--ngtb);color:var(--ngt);}
+.cF{background:var(--freb);color:var(--fre);}
+.cLV{background:#e2e8f0;color:#334155;border:1px solid #cbd5e1;font-weight:700;}
+.cLEAVE{background:var(--lvb);color:var(--lv);}
+.cPEND{background:var(--pndb);color:var(--pnd);}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.legit{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--dim);}
+.legdot{width:9px;height:9px;border-radius:3px;}
+
+/* ── LEAVE BAR ── */
+.lbwrap{margin-bottom:13px;}
+.lbhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.lbar{height:6px;background:var(--sur3);border-radius:99px;overflow:hidden;}
+.lbarfill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s;}
+
+/* ── FORM ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg{}.fg.full{grid-column:1/-1;}
+.fmlbl{font-size:12px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:block;}
+.fmi,.fms,.fmt{width:100%;background:var(--sur2);border:1px solid var(--brd);border-radius:var(--rs);padding:10px 13px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.fmi:focus,.fms:focus,.fmt:focus{border-color:var(--acl);}
+.fmt{resize:vertical;min-height:72px;}
+.fms option{background:var(--sur2);}
+
+/* ── BUTTONS ── */
+.btn{border-radius:var(--rs);padding:9px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.bac{background:var(--acc);color:#fff;}.bac:hover{background:var(--acl);}
+.bgh{background:var(--sur2);color:var(--dim);border:1px solid var(--brd);}.bgh:hover{border-color:var(--acl);color:var(--acl);}
+.bdn{background:var(--ngtb);color:var(--ngt);border:1px solid rgba(239,68,68,.3);}.bdn:hover{background:rgba(239,68,68,.22);}
+.bok{background:var(--freb);color:var(--fre);border:1px solid rgba(34,197,94,.3);}.bok:hover{background:rgba(34,197,94,.22);}
+.bsm{padding:5px 9px;font-size:12px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── TABLE ── */
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{text-align:left;padding:10px 13px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--brd);}
+td{padding:12px 13px;border-bottom:1px solid var(--brd);color:var(--dim);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--sur2);}
+.ename{font-weight:600;color:var(--txt);}
+
+/* ── TEAM BADGES ── */
+.tbdg{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;display:inline-block;}
+.t1{background:rgba(59,130,246,.15);color:#60a5fa;}
+.t2{background:rgba(168,85,247,.15);color:#c084fc;}
+.t3{background:rgba(245,158,11,.15);color:#fbbf24;}
+.t4{background:rgba(34,197,94,.15);color:#4ade80;}
+.tw{background:rgba(226,232,240,.10);color:#e2e8f0;border:1px solid rgba(226,232,240,.2);}
+.tX{background:rgba(6,182,212,.15);color:#22d3ee;}
+
+/* ── STATUS ── */
+.sbdg{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:3px;}
+.sp{background:var(--pndb);color:var(--pnd);}
+.sa{background:var(--freb);color:var(--fre);}
+.sr{background:var(--ngtb);color:var(--ngt);}
+.ndot{background:var(--ngt);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;}
+
+/* ── MODAL ── */
+.movl{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1000;}
+.movl.open{display:flex;}
+.modal{background:var(--sur);border:1px solid var(--brd);border-radius:16px;padding:28px;width:540px;max-width:96vw;max-height:90vh;overflow-y:auto;}
+.mtitle{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;margin-bottom:20px;}
+.mfoot{display:flex;gap:9px;justify-content:flex-end;margin-top:20px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:#1a1d24;color:#fff;border:1px solid #2e3340;border-radius:10px;padding:12px 17px;font-size:14px;z-index:9999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.25);max-width:340px;}
+.toast.show{display:block;animation:sup .3s ease;}
+.toast.ok{border-color:rgba(34,197,94,.4);}
+.toast.err{border-color:rgba(239,68,68,.4);}
+@keyframes sup{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+
+.divider{height:1px;background:var(--brd);margin:14px 0;}
+.av{width:29px;height:29px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px;flex-shrink:0;}
+.erow{display:flex;align-items:center;}
+.frow{display:flex;gap:9px;align-items:center;margin-bottom:13px;flex-wrap:wrap;}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px;margin-bottom:20px;}
+.tcard{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:17px;}
+.tcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.abs{display:flex;gap:6px;flex-wrap:wrap;}
+.infonote{padding:12px;background:var(--sur2);border-radius:8px;border:1px solid var(--brd);font-size:13px;line-height:1.7;margin-top:12px;}
+
+/* ── SETTINGS ── */
+.conn-ok{background:var(--freb);color:var(--fre);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;}
+.sadmin-badge{background:rgba(245,158,11,.18);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px;}
+.admin-badge{background:rgba(79,110,247,.15);color:#818cf8;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px;}
+.scope-tag{font-size:11px;color:var(--mut);background:var(--sur3);border-radius:4px;padding:2px 7px;border:1px solid var(--brd);}
+.leader-badge{background:rgba(245,158,11,.15);color:#fbbf24;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px;margin-left:6px;}
+.on-leave-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:var(--sur2);border:1px solid var(--brd);margin-bottom:6px;}
+.on-leave-row:last-child{margin-bottom:0;}
+.dash-panel{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:18px;}
+.team-section{margin-bottom:18px;}
+.team-section-title{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--brd);}
+.week-tab{display:flex;gap:4px;margin-bottom:14px;}
+.week-tab-btn{flex:1;padding:6px 4px;border-radius:6px;border:1px solid var(--brd);background:var(--sur2);color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;}
+.week-tab-btn.active{background:var(--agw);color:var(--acl);border-color:var(--acl);}
+.conn-no{background:var(--ngtb);color:var(--ngt);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;}
+code{background:var(--sur3);padding:1px 5px;border-radius:3px;font-size:12px;}
+
+/* ── PONTAJ ── */
+.pontaj-card{background:var(--sur);border:1px solid var(--brd);border-radius:16px;padding:28px;text-align:center;max-width:420px;margin:0 auto;}
+.pontaj-status{font-size:13px;color:var(--mut);margin-bottom:20px;padding:10px;background:var(--sur2);border-radius:8px;}
+.pontaj-btn{width:100%;padding:18px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
+.pontaj-btn-in{background:var(--acc);color:#fff;} .pontaj-btn-in:hover{background:var(--acl);}
+.pontaj-btn-out{background:var(--ngtb);color:var(--ngt);border:2px solid rgba(239,68,68,.4);} .pontaj-btn-out:hover{background:rgba(239,68,68,.2);}
+.pontaj-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin:16px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--brd);transition:background .2s;}
+.pin-dot.filled{background:var(--acl);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;}
+.pin-key{background:var(--sur2);border:1px solid var(--brd);border-radius:10px;padding:14px;font-size:18px;font-weight:700;cursor:pointer;color:var(--txt);transition:all .15s;}
+.pin-key:hover{background:var(--sur3);border-color:var(--acl);}
+.pin-key:active{transform:scale(.95);}
+.timer-active{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--acl);letter-spacing:-1px;margin:12px 0;}
+.gps-tag{font-size:11px;color:var(--mut);display:flex;align-items:center;gap:4px;justify-content:center;margin-top:8px;}
+.condica-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid var(--brd);font-size:13px;align-items:center;}
+.condica-row.header{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;background:var(--sur2);border-radius:8px 8px 0 0;}
+.condica-wrap{border:1px solid var(--brd);border-radius:8px;overflow:hidden;}
+.badge-in{background:var(--freb);color:var(--fre);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.badge-out{background:var(--ngtb);color:var(--ngt);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.badge-active{background:var(--agw);color:var(--acl);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+.alert-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 16px;margin-bottom:18px;}
+.alert-banner-title{font-size:13px;font-weight:700;color:var(--ngt);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.alert-item{font-size:12px;color:var(--dim);padding:5px 0;border-bottom:1px solid rgba(239,68,68,.1);display:flex;align-items:center;gap:8px;}
+.alert-item:last-child{border-bottom:none;}
+.alert-dot{width:6px;height:6px;border-radius:50%;background:var(--ngt);flex-shrink:0;}
+.alert-warn{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3);}
+.alert-warn .alert-banner-title{color:var(--lv);}
+.alert-warn .alert-dot{background:var(--lv);}
+.modified-tag{font-size:10px;color:var(--lv);font-weight:600;background:rgba(245,158,11,.12);padding:1px 5px;border-radius:3px;cursor:help;}
+
+@media(max-width:860px){
+  .topbar{display:flex;}
+  .sidebar{transform:translateX(-100%);top:54px;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:14px;padding-top:68px;}
+  .srow{grid-template-columns:1fr 1fr;}
+  .two{grid-template-columns:1fr;}
+  .fgrid{grid-template-columns:1fr;}
+  .fg.full{grid-column:1;}
+  #newLeaveGrid{grid-template-columns:1fr!important;}
+  #overviewGrid{grid-template-columns:1fr!important;}
+  .week-tab-btn{font-size:10px;padding:5px 2px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="spin-lg"></div>
+  <p id="loadingMsg">Se încarcă datele...</p>
+</div>
+
+<!-- SETUP (first time - no GS URL) -->
+<div id="setupScreen">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg viewBox="0 0 120 60" style="width:60px;height:auto"><rect width="120" height="60" rx="4" fill="#1a5c2a"/><text x="10" y="38" font-family="Arial Black" font-size="28" font-weight="900" fill="white">ITC</text><text x="10" y="52" font-family="Arial" font-size="10" fill="#90c090" letter-spacing="2">LOGISTIC</text></svg>
+      <div><div class="setup-title">Configurare inițială</div><div style="font-size:12px;color:var(--mut)">ITC Logistic — Pontaj</div></div>
+    </div>
+    <div class="setup-sub">Aplicația folosește <strong style="color:var(--acl)">Google Sheets</strong> ca bază de date centralizată. Toți angajații văd aceleași date, de pe orice device.</div>
+    <div class="setup-steps">
+      1. Mergi pe <a href="https://script.google.com" target="_blank">script.google.com</a> → <strong>New Project</strong><br>
+      2. Șterge codul existent și lipește scriptul (buton de mai jos)<br>
+      3. <strong>Deploy → New deployment → Web App</strong><br>
+      4. Execute as: <strong>Me</strong> | Who has access: <strong>Anyone</strong><br>
+      5. Copiază URL-ul generat și lipește-l mai jos
+    </div>
+    <div style="margin-bottom:14px">
+      <button class="btn bgh bsm" onclick="copyScript()" style="margin-bottom:10px">📋 Copiază Apps Script</button>
+      <span id="copyOk" style="font-size:12px;color:var(--fre);margin-left:8px;display:none">✓ Copiat!</span>
+    </div>
+    <div class="fgrp"><div class="flbl">URL Web App</div><input class="fi" id="setupUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <button class="btn bac" style="width:100%" onclick="saveSetup()" id="setupBtn">✅ Conectare &amp; Pornire</button>
+    <div id="setupErr" style="font-size:13px;color:var(--ngt);margin-top:10px;display:none"></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="lcard">
+    <div class="llogo">
+      <svg viewBox="0 0 120 60" style="width:54px;height:auto"><rect width="120" height="60" rx="4" fill="#1a5c2a"/><text x="10" y="38" font-family="Arial Black" font-size="28" font-weight="900" fill="white">ITC</text><text x="10" y="52" font-family="Arial" font-size="10" fill="#90c090" letter-spacing="2">LOGISTIC</text></svg>
+      <div class="llogo-text"><div class="lt1">ITC Logistic România</div><div class="lt2">Gestionare Pontaj</div></div>
+    </div>
+    <div class="lsep"></div>
+    <div class="fgrp"><div class="flbl">Utilizator</div><input class="fi" id="lU" placeholder="ex: ion.popescu" autocomplete="off"></div>
+    <div class="fgrp"><div class="flbl">Parolă</div><input class="fi" id="lP" type="password" placeholder="••••••••"></div>
+    <div class="lerr" id="lErr">Utilizator sau parolă incorectă.</div>
+    <button class="lbtn" id="loginBtn" onclick="doLogin()">Conectare</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <button class="hbg" onclick="toggleSB()"><span></span><span></span><span></span></button>
+    <div class="topbar-logo">
+      <svg viewBox="0 0 80 40" style="height:26px;width:auto"><rect width="80" height="40" rx="3" fill="#1a5c2a"/><text x="6" y="27" font-family="Arial Black" font-size="18" font-weight="900" fill="white">ITC</text></svg>
+      <span>Pontaj</span>
+    </div>
+    <span id="topUser" style="font-size:12px;color:var(--mut)"></span>
+  </div>
+  <div class="ovbg" id="ovbg" onclick="closeSB()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="shead">
+      <div class="shead-inner">
+        <svg viewBox="0 0 120 60" style="width:48px;height:auto"><rect width="120" height="60" rx="4" fill="#1a5c2a"/><text x="10" y="38" font-family="Arial Black" font-size="28" font-weight="900" fill="white">ITC</text><text x="10" y="52" font-family="Arial" font-size="10" fill="#90c090" letter-spacing="2">LOGISTIC</text></svg>
+        <div class="shead-text"><div class="st1">ITC Logistic</div><div class="st2">Pontaj</div></div>
+      </div>
+    </div>
+    <div class="nsec">
+      <span class="nlbl">General</span>
+      <div class="ni active" onclick="nav('dash')"><span class="ic">📊</span>Dashboard</div>
+      <div class="ni" onclick="nav('cal')"><span class="ic">📅</span>Ture &amp; Calendar</div>
+      <div class="ni" onclick="nav('leave')"><span class="ic">🏖</span>Concediile mele</div>
+      <div class="ni" onclick="nav('pontaj')"><span class="ic">📍</span>Pontaj</div>
+      <div class="ni" onclick="nav('newLeave')"><span class="ic">✍️</span>Cerere concediu</div>
+    </div>
+    <div class="nsec" id="adminNav" style="display:none">
+      <span class="nlbl">Admin</span>
+      <div class="ni" onclick="nav('aReq')"><span class="ic">📬</span>Cereri<span id="pBdg" class="ndot" style="display:none">0</span></div>
+      <div class="ni" onclick="nav('condica')"><span class="ic">📋</span>Condică</div>
+      <div class="ni" onclick="nav('aEmp')"><span class="ic">👥</span>Angajați</div>
+      <div class="ni" onclick="nav('aTeams')"><span class="ic">🔄</span>Echipe &amp; Ture</div>
+      <div class="ni" onclick="nav('settings')"><span class="ic">⚙️</span>Setări</div>
+      <div class="ni" id="niAdmins" style="display:none" onclick="nav('admins')"><span class="ic">🛡️</span>Administratori</div>
+    </div>
+    <div class="sfooter">
+      <div class="sname" id="sName">—</div>
+      <div class="srole" id="sRole">—</div>
+      <button class="logbtn" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Deconectare
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dash">
+      <div class="phead"><div class="ptitle" id="dTitle">Bună ziua! 👋</div><div class="psub" id="dSub">Iată situația ta de azi.</div></div>
+      <div class="srow">
+        <div class="scard"><div class="slbl">Tura azi</div><div class="sval" id="dToday">—</div></div>
+        <div class="scard"><div class="slbl">Concediu rămas</div><div class="sval" id="dLeave" style="color:var(--fre)">—</div></div>
+        <div class="scard"><div class="slbl">Cereri în așteptare</div><div class="sval" id="dPend" style="color:var(--pnd)">—</div></div>
+        <div class="scard"><div class="slbl">Echipa mea</div><div class="sval" id="dTeam">—</div></div>
+      </div>
+      <!-- PONTAJ QUICK ACTION -->
+      <div id="dashPontajBox" style="margin-bottom:20px;max-width:500px"></div>
+      <!-- ALERTE NECONCORDANȚE -->
+      <div id="alertBanner" style="display:none"></div>
+      <!-- ADMIN / LEADER: overview panel -->
+      <div id="overviewPanel" style="display:none;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="overviewGrid">
+          <div class="dash-panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div class="ctitle" style="margin-bottom:0" id="overviewPanelTitle">Concedii în perioadă</div>
+              <div class="week-tab">
+                <div class="week-tab-btn active" id="tabAzi" onclick="switchOverview('azi')">Azi</div>
+                <div class="week-tab-btn" id="tabSapt" onclick="switchOverview('sapt')">7 zile</div>
+                <div class="week-tab-btn" id="tabLuna" onclick="switchOverview('luna')">30 zile</div>
+              </div>
+            </div>
+            <div id="onLeaveList"><div style="font-size:13px;color:var(--mut)">Se încarcă...</div></div>
+          </div>
+          <div class="dash-panel">
+            <div class="ctitle">Situație echipe — azi</div>
+            <div id="teamStatusToday"></div>
+          </div>
+        </div>
+      </div>
+      <div class="two">
+        <div class="card"><div class="ctitle">Tura — săptămâna aceasta</div><div id="weekShifts"></div></div>
+        <div class="card">
+          <div class="ctitle">Sold concediu</div><div id="lbalW"></div>
+          <div class="divider"></div>
+          <div class="ctitle">Cereri recente</div><div id="recReq"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-cal">
+      <div class="phead"><div class="ptitle">📅 Ture &amp; Calendar</div><div class="psub">Calendarul turelor pe lună</div></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+          <div class="calnav">
+            <button class="calbtn" onclick="calPrev()">‹</button>
+            <span class="calmonth" id="calLbl"></span>
+            <button class="calbtn" onclick="calNext()">›</button>
+          </div>
+          <div id="calEmpW" style="display:none"><select class="fms" id="calEmpSel" onchange="renderCal()" style="width:210px"></select></div>
+        </div>
+        <div class="legend">
+          <div class="legit"><div class="legdot" style="background:var(--day)"></div>Zi (07-19)</div>
+          <div class="legit"><div class="legdot" style="background:var(--ngt)"></div>Noapte (19-07)</div>
+          <div class="legit"><div class="legdot" style="background:var(--fre)"></div>Liber</div>
+          <div class="legit"><div class="legdot" style="background:var(--lv)"></div>Concediu</div>
+          <div class="legit"><div class="legdot" style="background:var(--pnd)"></div>Cerere</div>
+          <div class="legit"><div class="legdot" style="background:var(--wht);opacity:.5"></div>Team White</div>
+        </div>
+        <div class="calgrid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <!-- PONTAJ -->
+    <div class="page" id="page-pontaj">
+      <div class="phead"><div class="ptitle">📍 Pontaj</div><div class="psub" id="pontajSub">Înregistrează intrarea și ieșirea din tură</div></div>
+      <div class="pontaj-card" id="pontajCard">
+        <div id="pontajShiftInfo" style="margin-bottom:16px"></div>
+        <div class="pontaj-status" id="pontajStatus">Se verifică statusul...</div>
+        <div class="timer-active" id="pontajTimer" style="display:none">00:00:00</div>
+        <div class="gps-tag" id="pontajGps" style="flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:5px"><span>📡</span><span id="pontajGpsTxt">Se obține locația...</span></div>
+          <button class="btn bgh bsm" id="gpsReqBtn" onclick="requestGPS();document.getElementById('gpsReqBtn').textContent='⏳ Se obține...';document.getElementById('gpsReqBtn').disabled=true;setTimeout(()=>{document.getElementById('gpsReqBtn').textContent='🔄 Reîncearcă locația';document.getElementById('gpsReqBtn').disabled=false;},5000)" style="font-size:11px;padding:4px 10px">
+            📍 Permite locația GPS
+          </button>
+        </div>
+        <div id="gpsWarning" style="display:none;font-size:12px;color:var(--lv);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:8px;margin-top:6px">
+          ⚠️ Fără locație GPS — pontajul va fi înregistrat fără coordonate.
+        </div>
+        <div style="margin-top:20px">
+          <button class="pontaj-btn pontaj-btn-in" id="btnIn" onclick="startPontaj()" disabled>
+            ▶ Intru în tură
+          </button>
+          <button class="pontaj-btn pontaj-btn-out" id="btnOut" onclick="endPontaj()" disabled style="display:none">
+            ⏹ Ies din tură
+          </button>
+        </div>
+        <!-- PIN Modal inline -->
+        <div id="pinModal" style="display:none;margin-top:20px;padding:20px;background:var(--sur2);border-radius:12px;border:1px solid var(--brd)">
+          <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:4px" id="pinTitle">Introdu PIN-ul tău</div>
+          <div style="font-size:12px;color:var(--mut);margin-bottom:14px">PIN setat de admin — 4 cifre</div>
+          <div class="pin-wrap">
+            <div class="pin-dot" id="pd0"></div>
+            <div class="pin-dot" id="pd1"></div>
+            <div class="pin-dot" id="pd2"></div>
+            <div class="pin-dot" id="pd3"></div>
+          </div>
+          <div class="pin-pad">
+            <div class="pin-key" onclick="pinKey('1')">1</div>
+            <div class="pin-key" onclick="pinKey('2')">2</div>
+            <div class="pin-key" onclick="pinKey('3')">3</div>
+            <div class="pin-key" onclick="pinKey('4')">4</div>
+            <div class="pin-key" onclick="pinKey('5')">5</div>
+            <div class="pin-key" onclick="pinKey('6')">6</div>
+            <div class="pin-key" onclick="pinKey('7')">7</div>
+            <div class="pin-key" onclick="pinKey('8')">8</div>
+            <div class="pin-key" onclick="pinKey('9')">9</div>
+            <div class="pin-key" onclick="pinClear()" style="font-size:13px;color:var(--mut)">⌫</div>
+            <div class="pin-key" onclick="pinKey('0')">0</div>
+            <div class="pin-key" onclick="pinCancel()" style="font-size:13px;color:var(--ngt)">✕</div>
+          </div>
+          <div id="pinErr" style="font-size:12px;color:var(--ngt);margin-top:10px;display:none">PIN incorect. Încearcă din nou.</div>
+        </div>
+      </div>
+      <!-- My pontaj history -->
+      <div style="max-width:700px;margin:24px auto 0">
+        <div class="card">
+          <div class="ctitle">Ultimele pontaje ale mele</div>
+          <div id="myPontajList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONDICĂ ADMIN -->
+    <div class="page" id="page-condica">
+      <div class="phead"><div class="ptitle">📋 Condică pontaj</div><div class="psub">Înregistrări intrare/ieșire toate echipele</div></div>
+      <div class="frow" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <select class="fms" id="condicaTeamFil" onchange="renderCondica()" style="width:200px" multiple size="3">
+            <option value="all" selected>Toate echipele</option>
+          </select>
+          <div style="font-size:11px;color:var(--mut);align-self:center">Ctrl+click pentru selecție multiplă</div>
+          <input type="date" class="fmi" id="condicaFrom" style="width:150px" onchange="renderCondica()">
+          <input type="date" class="fmi" id="condicaTo" style="width:150px" onchange="renderCondica()">
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn bgh bsm" onclick="refreshAll()">🔄 Actualizează</button>
+          <button class="btn bac bsm" onclick="exportCondicaPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="condica-row header">
+          <div>Angajat</div><div>Data</div><div>Intrare</div><div>Ieșire</div><div>Durata</div><div>Locație</div>
+        </div>
+        <div id="condicaList"></div>
+      </div>
+    </div>
+
+    <!-- MY LEAVE -->
+    <div class="page" id="page-leave">
+      <div class="phead"><div class="ptitle">🏖 Concediile mele</div><div class="psub">Istoricul cererilor tale</div></div>
+      <div class="srow" style="grid-template-columns:repeat(3,1fr)">
+        <div class="scard"><div class="slbl">Zile totale / an</div><div class="sval" id="lvTot">—</div></div>
+        <div class="scard"><div class="slbl">Utilizate</div><div class="sval" id="lvUsd" style="color:var(--lv)">—</div></div>
+        <div class="scard"><div class="slbl">Rămase</div><div class="sval" id="lvRem" style="color:var(--fre)">—</div></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Cereri concediu</div>
+        <div class="twrap"><table><thead><tr><th>Perioadă</th><th>Schimb</th><th>Zile deduse</th><th>Tip</th><th>Status</th><th>Obs. admin</th></tr></thead><tbody id="myLvTb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- NEW LEAVE -->
+    <div class="page" id="page-newLeave">
+      <div class="phead"><div class="ptitle">✍️ Cerere concediu nouă</div><div class="psub">Turele sunt detectate automat din programul echipei tale</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:960px" id="newLeaveGrid">
+        <div class="card">
+          <div style="font-size:12px;color:var(--mut);margin-bottom:14px;line-height:1.6;background:var(--sur2);border-radius:8px;padding:10px">
+            ℹ️ <strong style="color:var(--txt)">Regulă:</strong> <span style="color:var(--day)">☀ Zi</span> = 1 zi concediu &nbsp;|&nbsp; <span style="color:var(--ngt)">🌙 Noapte</span> = 2 zile (ziua intrării + ieșirii) &nbsp;|&nbsp; <span style="color:var(--fre)">Liber</span> = 0 zile
+          </div>
+          <div class="fgrid" style="gap:16px">
+            <div class="fg"><label class="fmlbl">Data început</label><input type="date" class="fmi" id="lvS"></div>
+            <div class="fg"><label class="fmlbl">Data sfârșit</label><input type="date" class="fmi" id="lvE"></div>
+            <div class="fg full"><label class="fmlbl">Tip concediu</label>
+              <select class="fms" id="lvTy">
+                <option value="Odihnă">Concediu de odihnă</option>
+                <option value="Medical">Concediu medical</option>
+                <option value="Fără plată">Concediu fără plată</option>
+                <option value="Altul">Altul</option>
+              </select>
+            </div>
+            <div class="fg full"><label class="fmlbl">Observații (opțional)</label><textarea class="fmt" id="lvNo" placeholder="Detalii relevante..."></textarea></div>
+          </div>
+          <div class="infonote" id="lvCalcBox"><div id="lvCalcTxt" style="color:var(--dim)">Selectează perioada pentru a vedea turele și calcula zilele deduse.</div></div>
+          <div style="display:flex;gap:12px;margin-top:14px"><button class="btn bac" id="lvBtn" onclick="submitLeave()">📤 Trimite cererea</button></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Ture în perioada selectată</div>
+          <div id="lvMiniCal" style="font-size:13px;color:var(--mut)">Selectează o perioadă în stânga.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN: REQUESTS -->
+    <div class="page" id="page-aReq">
+      <div class="phead"><div class="ptitle">📬 Cereri concediu</div><div class="psub">Aprobă sau respinge cererile angajaților</div></div>
+      <div class="frow">
+        <select class="fms" id="reqFil" onchange="renderAReq()" style="width:170px">
+          <option value="all">Toate statusurile</option>
+          <option value="Pending">În așteptare</option>
+          <option value="Approved">Aprobate</option>
+          <option value="Rejected">Respinse</option>
+        </select>
+        <button class="btn bgh bsm" onclick="refreshAll()">🔄 Actualizează</button>
+      </div>
+      <div class="card"><div class="twrap"><table><thead><tr><th>Angajat</th><th>Echipă</th><th>Perioadă</th><th>Schimb</th><th>Zile</th><th>Tip</th><th>Status</th><th>Acțiuni</th></tr></thead><tbody id="aReqTb"></tbody></table></div></div>
+    </div>
+
+    <!-- ADMIN: EMPLOYEES -->
+    <div class="page" id="page-aEmp">
+      <div class="phead"><div class="ptitle">👥 Angajați</div><div class="psub">Gestionează conturi, echipe și solduri</div></div>
+      <div class="frow" style="justify-content:space-between">
+        <select class="fms" id="empFil" onchange="renderAEmp()" style="width:170px">
+          <option value="all">Toate echipele</option>
+        </select>
+        <button class="btn bac" onclick="openEmpMod()">+ Angajat nou</button>
+      </div>
+      <div class="card"><div class="twrap"><table><thead><tr><th>Nume</th><th>User</th><th>Echipă</th><th>Zile total</th><th>Utilizate</th><th>Rămase</th><th>Acțiuni</th></tr></thead><tbody id="aEmpTb"></tbody></table></div></div>
+    </div>
+
+    <!-- ADMIN: TEAMS -->
+    <div class="page" id="page-aTeams">
+      <div class="phead"><div class="ptitle">🔄 Echipe &amp; Ture</div><div class="psub">Configurare cicluri, membrii și ture</div></div>
+      <div style="margin-bottom:16px"><button class="btn bac" onclick="openTeamMod()">+ Echipă nouă</button></div>
+      <div class="tgrid" id="teamsGrid"></div>
+      <div class="card"><div class="ctitle" id="whiteCardTitle">Team White — Program Luni–Vineri</div><div id="whiteM"></div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="phead"><div class="ptitle">⚙️ Setări</div><div class="psub">Google Sheets &amp; EmailJS</div></div>
+      <div class="card" style="max-width:600px;margin-bottom:20px">
+        <div class="ctitle">Google Sheets</div>
+        <div style="font-size:12px;color:var(--mut);background:var(--sur2);border-radius:6px;padding:8px 10px;margin-bottom:10px">ℹ️ URL-ul este hardcodat în fișierul HTML. Toți utilizatorii folosesc același URL automat. Schimbarea de mai jos afectează doar browserul curent.</div>
+        <div id="gsStatusWrap" style="margin-bottom:14px"></div>
+        <div class="fgrp"><div class="flbl">URL Web App</div><input class="fmi" id="gsUrlInp" placeholder="https://script.google.com/macros/s/.../exec"></div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn bac" onclick="updateGsUrl()">💾 Actualizează URL</button>
+          <button class="btn bgh bsm" onclick="copyScript()">📋 Copiază Apps Script</button>
+          <span id="copyOk2" style="font-size:12px;color:var(--fre);align-self:center;display:none">✓ Copiat!</span>
+        </div>
+      </div>
+      <div class="card" style="max-width:600px">
+        <div class="ctitle">EmailJS — Notificări email</div>
+        <div style="font-size:13px;color:var(--mut);margin-bottom:14px;line-height:1.7">
+          Variabile template: <code>{{employee_name}}</code> <code>{{team}}</code> <code>{{start_date}}</code> <code>{{end_date}}</code> <code>{{days}}</code> <code>{{shift_type}}</code> <code>{{leave_type}}</code> <code>{{note}}</code>
+        </div>
+        <div class="fgrid" style="gap:14px;margin-bottom:14px">
+          <div class="fg"><label class="fmlbl">Public Key</label><input class="fmi" id="ejK" placeholder="user_xxx"></div>
+          <div class="fg"><label class="fmlbl">Service ID</label><input class="fmi" id="ejS" placeholder="service_xxx"></div>
+          <div class="fg"><label class="fmlbl">Template ID</label><input class="fmi" id="ejT" placeholder="template_xxx"></div>
+          <div class="fg"><label class="fmlbl">Email destinatar</label><input class="fmi" id="ejE" placeholder="romania@itc-logistic.ro"></div>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+          <button class="btn bac" onclick="saveEJ()">💾 Salvează</button>
+          <button class="btn bgh bsm" onclick="testEmail()">📧 Test email</button>
+          <span id="ejStatusTxt" style="font-size:12px;color:var(--mut)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPER-ADMIN: MANAGE ADMINS -->
+    <div class="page" id="page-admins">
+      <div class="phead"><div class="ptitle">🛡️ Administratori</div><div class="psub">Creează și gestionează admini locali cu acces la echipele lor</div></div>
+      <div class="frow" style="justify-content:space-between">
+        <div style="font-size:13px;color:var(--mut)">Fiecare admin vede doar echipele atribuite lui.</div>
+        <button class="btn bac" onclick="openAdminMod()">+ Admin nou</button>
+      </div>
+      <div class="card"><div class="twrap"><table><thead><tr><th>Nume</th><th>User</th><th>Tip</th><th>Echipe atribuite</th><th>Email notificări</th><th>Acțiuni</th></tr></thead><tbody id="adminsTb"></tbody></table></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="movl" id="editLeaveMod">
+  <div class="modal">
+    <div class="mtitle">✏️ Modificare cerere aprobată</div>
+    <div id="editLeaveInfo" style="font-size:13px;color:var(--dim);background:var(--sur2);border-radius:8px;padding:12px;margin-bottom:16px"></div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg"><label class="fmlbl">Data început</label><input type="date" class="fmi" id="elStart"></div>
+      <div class="fg"><label class="fmlbl">Data sfârșit</label><input type="date" class="fmi" id="elEnd"></div>
+      <div class="fg full"><label class="fmlbl">Tip concediu</label>
+        <select class="fms" id="elType">
+          <option value="Odihnă">Concediu de odihnă</option>
+          <option value="Medical">Concediu medical</option>
+          <option value="Fără plată">Concediu fără plată</option>
+          <option value="Altul">Altul</option>
+        </select>
+      </div>
+      <div class="fg full"><label class="fmlbl">Observații</label><textarea class="fmt" id="elNote" placeholder="Detalii..."></textarea></div>
+    </div>
+    <div class="infonote" id="elCalcBox" style="margin-top:12px"><div id="elCalcTxt" style="color:var(--dim)">Modifică datele pentru a recalcula.</div></div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('editLeaveMod')">Anulează</button>
+      <button class="btn bac" id="saveEditLeaveBtn" onclick="saveEditLeave()">💾 Salvează modificarea</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="editPontajMod">
+  <div class="modal">
+    <div class="mtitle">✏️ Modificare pontaj</div>
+    <div id="editPontajInfo" style="font-size:13px;color:var(--dim);background:var(--sur2);border-radius:8px;padding:12px;margin-bottom:16px"></div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg"><label class="fmlbl">Data</label><input type="date" class="fmi" id="epDate"></div>
+      <div class="fg"><label class="fmlbl">Ora intrare</label><input type="time" class="fmi" id="epIn"></div>
+      <div class="fg"><label class="fmlbl">Ora ieșire</label><input type="time" class="fmi" id="epOut" placeholder="Lasă gol dacă nu a ieșit"></div>
+      <div class="fg full"><label class="fmlbl">Motiv modificare (intern)</label><input class="fmi" id="epReason" placeholder="ex: Angajat a uitat să ponteze ieșirea"></div>
+    </div>
+    <div style="font-size:12px;color:var(--mut);margin-top:10px;padding:10px;background:var(--sur2);border-radius:8px">
+      ℹ️ Motivul modificării este vizibil doar intern. În export PDF apare doar <em>(c)</em> discret lângă ora modificată.
+    </div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('editPontajMod')">Anulează</button>
+      <button class="btn bac" id="saveEditPontajBtn" onclick="saveEditPontaj()">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="revMod">
+  <div class="modal">
+    <div class="mtitle">📋 Revizuire cerere</div>
+    <div id="revDet" style="font-size:14px;color:var(--dim);line-height:2;background:var(--sur2);border-radius:8px;padding:13px;margin-bottom:14px"></div>
+    <label class="fmlbl">Observații admin (opțional)</label>
+    <textarea class="fmt" id="revNote" placeholder="Motivul aprobării / respingerii..."></textarea>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('revMod')">Anulează</button>
+      <button class="btn bdn" onclick="revLeave('Rejected')">✕ Respinge</button>
+      <button class="btn bok" onclick="revLeave('Approved')">✓ Aprobă</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="empMod">
+  <div class="modal">
+    <div class="mtitle">👤 Angajat nou</div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg"><label class="fmlbl">Prenume</label><input class="fmi" id="eFn" placeholder="Ion"></div>
+      <div class="fg"><label class="fmlbl">Nume</label><input class="fmi" id="eLn" placeholder="Popescu"></div>
+      <div class="fg"><label class="fmlbl">Username</label><input class="fmi" id="eU" placeholder="ion.popescu"></div>
+      <div class="fg"><label class="fmlbl">Parolă</label><input class="fmi" id="eP" type="password" placeholder="••••••••"></div>
+      <div class="fg full"><label class="fmlbl">Tip angajat</label>
+        <select class="fms" id="eType" onchange="togTeam('eTeamW','eType')">
+          <option value="shift">Ture rotative (Zi→Noapte→Liber→Liber)</option>
+          <option value="lv">Team White — Program fix L-V</option>
+        </select>
+      </div>
+      <div class="fg full" id="eTeamW"><label class="fmlbl">Echipă</label><select class="fms" id="eTeam"></select></div>
+      <div class="fg full"><label class="fmlbl">Zile concediu (sold inițial — zile rămase în an)</label><input class="fmi" type="number" id="eDays" value="21" min="0" max="60"></div>
+      <div class="fg full"><label class="fmlbl">PIN pontaj (4 cifre)</label><input class="fmi" id="ePin" type="password" maxlength="4" placeholder="ex: 1234" autocomplete="off"></div>
+      <div class="fg full"><label style="display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" id="eLeader" style="width:16px;height:16px;accent-color:var(--acl)" onchange="toggleLeaderEmail()"><span class="fmlbl" style="margin:0">Team Leader (vede concediile echipei sale)</span></label></div>
+      <div class="fg full" id="eLeaderEmailWrap" style="display:none"><label class="fmlbl">Email team leader (primește notificări la aprobare)</label><input class="fmi" id="eLeaderEmail" placeholder="leader@itc-logistic.ro"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('empMod')">Anulează</button>
+      <button class="btn bac" id="saveEmpBtn" onclick="saveEmp()">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="editMod">
+  <div class="modal">
+    <div class="mtitle">✏️ Editare angajat</div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg full"><label class="fmlbl">Nume complet</label><input class="fmi" id="edNm"></div>
+      <div class="fg full"><label class="fmlbl">Tip angajat</label>
+        <select class="fms" id="edType" onchange="togTeam('edTeamW','edType')">
+          <option value="shift">Ture rotative</option>
+          <option value="lv">Team White — L-V</option>
+        </select>
+      </div>
+      <div class="fg full" id="edTeamW"><label class="fmlbl">Echipă</label><select class="fms" id="edTeam"></select></div>
+      <div class="fg full"><label class="fmlbl">Zile concediu total</label><input class="fmi" type="number" id="edDays" min="0" max="60"></div>
+      <div class="fg full"><label class="fmlbl">PIN pontaj (4 cifre — setat de admin)</label><input class="fmi" id="edPin" type="password" maxlength="4" placeholder="ex: 1234" autocomplete="off"></div>
+      <div class="fg full"><label style="display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" id="edLeader" style="width:16px;height:16px;accent-color:var(--acl)" onchange="toggleEditLeaderEmail()"><span class="fmlbl" style="margin:0">Team Leader</span></label></div>
+      <div class="fg full" id="edLeaderEmailWrap" style="display:none"><label class="fmlbl">Email team leader</label><input class="fmi" id="edLeaderEmail" placeholder="leader@itc-logistic.ro"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('editMod')">Anulează</button>
+      <button class="btn bac" id="saveEditBtn" onclick="saveEdit()">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="teamMod">
+  <div class="modal">
+    <div class="mtitle" id="teamModTitle">🏷 Echipă nouă</div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg full"><label class="fmlbl">Nume echipă</label><input class="fmi" id="tName" placeholder="ex: Team White TM, Depozit BV, HR..."></div>
+      <div class="fg full"><label class="fmlbl">Notă / descriere (opțional)</label><input class="fmi" id="tNote" placeholder="ex: Producție linie 2"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('teamMod')">Anulează</button>
+      <button class="btn bac" id="saveTeamBtn" onclick="saveTeam()">✅ Creează</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="adminMod">
+  <div class="modal">
+    <div class="mtitle" id="adminModTitle">🛡️ Admin nou</div>
+    <div class="fgrid" style="gap:14px">
+      <div class="fg"><label class="fmlbl">Prenume</label><input class="fmi" id="adFn" placeholder="Andrei"></div>
+      <div class="fg"><label class="fmlbl">Nume</label><input class="fmi" id="adLn" placeholder="Ionescu"></div>
+      <div class="fg"><label class="fmlbl">Username</label><input class="fmi" id="adU" placeholder="andrei.ionescu"></div>
+      <div class="fg"><label class="fmlbl">Parolă</label><input class="fmi" id="adP" type="password" placeholder="••••••••"></div>
+      <div class="fg"><label class="fmlbl">Email notificări</label><input class="fmi" id="adEmail" placeholder="brasov@itc-logistic.ro"></div>
+      <div class="fg"><label class="fmlbl">Zile concediu (sold inițial)</label><input class="fmi" type="number" id="adDays" value="21" min="0" max="60"></div>
+      <div class="fg full"><label class="fmlbl">PIN pontaj (4 cifre)</label><input class="fmi" id="adPin" type="password" maxlength="4" placeholder="ex: 1234" autocomplete="off"></div>
+      <div class="fg full" id="adTeamsWrap">
+        <label class="fmlbl">Echipe atribuite</label>
+        <div id="adTeamsCheck" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px"></div>
+        <div style="font-size:12px;color:var(--mut);margin-top:6px">Adminul va vedea și gestiona doar aceste echipe.</div>
+      </div>
+      <div class="fg full" id="superAdminWrap">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:rgba(245,158,11,.08);border-radius:8px;border:1px solid rgba(245,158,11,.2)">
+          <input type="checkbox" id="adSuper" style="width:16px;height:16px;accent-color:#f59e0b">
+          <div><span class="fmlbl" style="margin:0;color:#fbbf24">⭐ Super Admin</span><div style="font-size:11px;color:var(--mut);margin-top:2px">Vede toate echipele din aplicație (ca și tine)</div></div>
+        </label>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('adminMod')">Anulează</button>
+      <button class="btn bac" id="saveAdminBtn" onclick="saveAdmin()">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="movl" id="cfgMod">
+  <div class="modal">
+    <div class="mtitle" id="cfgTitle">⚙️ Configurare ciclu ture</div>
+    <div style="font-size:13px;color:var(--mut);margin-bottom:14px;line-height:1.7;background:var(--sur2);border-radius:8px;padding:12px">
+      Ciclu 12/24–12/48: <strong style="color:var(--day)">☀ Zi</strong> → <strong style="color:var(--ngt)">🌙 Noapte</strong> → <strong style="color:var(--fre)">💤 Liber</strong> → <strong style="color:var(--fre)">💤 Liber</strong> → repeat<br>
+      Setează o dată când această echipă e pe <strong style="color:var(--day)">☀ Zi</strong>.
+    </div>
+    <div class="fg full" style="margin-bottom:14px">
+      <label class="fmlbl">Dată referință — echipa e pe ZI în această zi</label>
+      <input type="date" class="fmi" id="cfgRef" oninput="prevCfg()">
+    </div>
+    <div id="cfgPrev" style="padding:12px;background:var(--sur2);border-radius:8px;border:1px solid var(--brd);min-height:60px;font-size:13px"></div>
+    <div class="mfoot">
+      <button class="btn bgh" onclick="closeMod('cfgMod')">Anulează</button>
+      <button class="btn bac" onclick="saveCfg()">✅ Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════
+//  SHIFT ENGINE — D→N→F→F (4 zile)
+//  18 Mai 2026: T3=D, T2=N, T1=F, T4=F
+// ═══════════════════════════════════════════════════
+const CYCLE=['D','N','F','F'];
+const EPOCH=new Date(2026,4,18);
+const TEAM_OFF={'1':3,'2':1,'3':0,'4':2};
+
+function getShift(team,dateObj){
+  const d=new Date(dateObj);d.setHours(0,0,0,0);
+  if(team.refDate){const r=new Date(team.refDate);r.setHours(0,0,0,0);return CYCLE[((Math.round((d-r)/86400000)%4)+4)%4];}
+  const e=new Date(EPOCH);e.setHours(0,0,0,0);
+  const diff=Math.round((d-e)/86400000);
+  return CYCLE[((diff+(TEAM_OFF[team.id]||0))%4+4)%4];
+}
+function lvShift(d){const dw=new Date(d).getDay();return(dw===0||dw===6)?'F':'LV';}
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let users=[],teams=[],leaves=[];
+let cu=null,calY=2026,calM=4,revId=null,editUid=null,cfgTid=null,nextTN=5;
+// GS_URL: ALWAYS use hardcoded URL — single source of truth
+// To change URL for ALL users, update this file and redeploy
+const GS_URL_DEFAULT='https://script.google.com/macros/s/AKfycbzZVS74czAPs5y6FN99s3tFCcH09PiDEB4s_BUoN8x-7uLFJ_nfBa7CvE0F3duig8LR/exec';
+let GS_URL=GS_URL_DEFAULT; // ignores localStorage - all users use same URL
+localStorage.removeItem('itc_gs'); // clear any old overrides
+let EJ={key:localStorage.getItem('itc_ej_k')||'KdTbgMtON8unIjQh2',svc:localStorage.getItem('itc_ej_s')||'service_s4i8rwm',tpl:localStorage.getItem('itc_ej_t')||'template_atpr3md',to:localStorage.getItem('itc_ej_e')||'a.radan@itc-logistic.ro'};
+
+// ═══════════════════════════════════════════════════
+//  GOOGLE SHEETS API
+//  Uses GET with encoded payload to avoid CORS issues
+// ═══════════════════════════════════════════════════
+// ── Google Sheets API via fetch (POST + GET) ──
+async function gsCall(payload){
+  if(!GS_URL)throw new Error('NO_URL');
+  // Compress payload: remove null/empty fields to shorten URL
+  const slim=Object.fromEntries(Object.entries(payload).filter(([k,v])=>v!==null&&v!==''&&v!==undefined));
+  // If payload has nested object (pontaj), compress it too
+  if(slim.pontaj){
+    slim.pontaj=Object.fromEntries(Object.entries(slim.pontaj).filter(([k,v])=>v!==null&&v!==''&&v!==undefined));
+  }
+  const dataStr=encodeURIComponent(JSON.stringify(slim));
+  const url=GS_URL+'?action='+encodeURIComponent(payload.action)+'&data='+dataStr;
+  console.log('[GS] URL length:',url.length,'action:',payload.action);
+  try{
+    const res=await fetch(url,{redirect:'follow'});
+    const txt=await res.text();
+    console.log('[GS] Response:',txt.slice(0,200));
+    // GAS sometimes returns HTML on auth error
+    if(txt.trim().startsWith('<')){
+      console.error('[GS] Got HTML instead of JSON - auth issue');
+      throw new Error('Eroare autentificare Google Script. Redeploy necesar.');
+    }
+    try{return JSON.parse(txt);}catch{return{ok:false,error:txt.slice(0,100)};}
+  }catch(e){
+    if(e.message.includes('Eroare'))throw e;
+    throw new Error('Conexiune eșuată: '+e.message);
+  }
+}
+
+async function gsGet(action,params={}){
+  if(!GS_URL)throw new Error('NO_URL');
+  let url=GS_URL+'?action='+encodeURIComponent(action);
+  Object.entries(params).forEach(([k,v])=>{url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(v);});
+  const res=await fetch(url);
+  const txt=await res.text();
+  try{return JSON.parse(txt);}catch{return{ok:false};}
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+async function init(){
+  showEl('loadingOverlay');
+  if(!GS_URL){hideEl('loadingOverlay');showEl('setupScreen');return;}
+  try{
+    setLoadMsg('Se conectează la Google Sheets...');
+    const data=await gsGet('loadAll');
+    if(data.error||!data.users){throw new Error(data.error||'invalid');}
+    users=data.users||[];teams=data.teams||[];leaves=data.leaves||[];pontaje=data.pontaje||[];
+    console.log('[Init] Loaded - users:',users.length,'leaves:',leaves.length,'pontaje:',pontaje.length);
+    if(!teams.length)teams=defaultTeams();
+    nextTN=Math.max(...teams.filter(t=>t.type==='shift'&&!isNaN(t.id)).map(t=>parseInt(t.id)),4)+1;
+    cacheLocal();
+    hideEl('loadingOverlay');
+    showLoginScreen();
+  }catch(e){
+    hideEl('loadingOverlay');
+    // If GS fails, try localStorage fallback
+    const localData=localStorage.getItem('itc_data');
+    if(localData){
+      try{const d=JSON.parse(localData);users=d.users||[];teams=d.teams||defaultTeams();leaves=d.leaves||[];pontaje=d.pontaje||[];console.log('[Cache fallback] pontaje:',pontaje.length);}catch{}
+      showLoginScreen();
+      toast('⚠ Offline — date locale. Reconectează-te la internet.','err');
+    }else{
+      showEl('setupScreen');
+    }
+  }
+}
+
+function defaultTeams(){
+  return[
+    {id:'1',name:'Team 1',type:'shift',note:'',refDate:null},
+    {id:'2',name:'Team 2',type:'shift',note:'',refDate:null},
+    {id:'3',name:'Team 3',type:'shift',note:'',refDate:null},
+    {id:'4',name:'Team 4',type:'shift',note:'',refDate:null},
+    {id:'white',name:'Team White',type:'lv',note:''},
+  ];
+}
+
+function cacheLocal(){localStorage.setItem('itc_data',JSON.stringify({users,teams,leaves,pontaje}));}
+
+async function refreshAll(){
+  if(!GS_URL)return;
+  try{
+    const data=await gsGet('loadAll');
+    if(data.users){users=data.users;teams=data.teams||defaultTeams();leaves=data.leaves||[];pontaje=data.pontaje||[];
+    console.log('[Refresh] Pontaje loaded:',pontaje.length);pontaje=data.pontaje||[];cacheLocal();}
+    renderCurrent();toast('✅ Date actualizate','ok');
+  }catch{toast('⚠ Nu s-a putut actualiza','err');}
+}
+
+function renderCurrent(){
+  const pages={dash:renderDash,cal:renderCal,leave:renderLeave,aReq:renderAReq,aEmp:renderAEmp,aTeams:renderATeams};
+  const active=document.querySelector('.page.active');
+  if(!active)return;
+  const id=active.id.replace('page-','');
+  if(pages[id])pages[id]();
+  updBadge();
+}
+
+// ═══════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════
+async function saveSetup(){
+  const url=document.getElementById('setupUrl').value.trim();
+  if(!url){showSetupErr('Introdu URL-ul.');return;}
+  const btn=document.getElementById('setupBtn');
+  btn.innerHTML='<div class="spin"></div> Se conectează...';btn.disabled=true;
+  try{
+    GS_URL=url;
+    const data=await gsGet('loadAll');
+    if(data.error&&!data.users)throw new Error('Răspuns invalid de la script.');
+    localStorage.setItem('itc_gs',GS_URL);
+    // Initialize with default data if empty
+    if(!data.users||!data.users.length){
+      users=getDefaultUsers();teams=defaultTeams();leaves=[];
+      await gsCall({action:'saveAll',users,teams,leaves});
+    }else{
+      users=data.users;teams=data.teams||defaultTeams();leaves=data.leaves||[];
+    }
+    cacheLocal();
+    hideEl('setupScreen');showLoginScreen();
+  }catch(e){showSetupErr('Eroare: '+e.message+'. Verifică URL-ul și că scriptul este deploiat corect.');
+    btn.innerHTML='✅ Conectare &amp; Pornire';btn.disabled=false;}
+}
+
+function getDefaultUsers(){
+  return[
+    {id:1,user:'admin',pass:'admin123',role:'admin',name:'Administrator',team:null,type:'admin',leaveDays:21,isSuperAdmin:true,adminEmail:'',adminTeams:[]},
+  ];
+}
+
+function showSetupErr(msg){document.getElementById('setupErr').textContent=msg;document.getElementById('setupErr').style.display='block';}
+
+// ═══════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════
+function showLoginScreen(){
+  showEl('loginScreen');
+  if(EJ.key&&EJ.svc&&EJ.tpl)emailjs.init(EJ.key);
+else emailjs.init('KdTbgMtON8unIjQh2');
+}
+
+async function doLogin(){
+  const u=document.getElementById('lU').value.trim();
+  const p=document.getElementById('lP').value;
+  const btn=document.getElementById('loginBtn');
+  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  // Refresh data from sheets before login
+  try{
+    const d=await gsGet('loadAll');
+    if(d.users){
+      users=d.users;teams=d.teams||defaultTeams();leaves=d.leaves||[];
+      pontaje=d.pontaje||[];
+      console.log('[Login] Pontaje loaded from Sheets:',pontaje.length);
+      cacheLocal();
+    }
+  }catch(e){console.warn('[Login] Could not refresh from Sheets:',e);}
+  btn.innerHTML='Conectare';btn.disabled=false;
+  const f=users.find(x=>x.user===u&&x.pass===p);
+  if(!f){document.getElementById('lErr').style.display='block';return;}
+  document.getElementById('lErr').style.display='none';
+  cu=f;
+  hideEl('loginScreen');showEl('app');
+  // Sync fresh data from Sheets after login
+  gsGet('loadAll').then(d=>{
+    if(d&&d.pontaje&&d.pontaje.length>=pontaje.length){
+      pontaje=d.pontaje;cacheLocal();
+      console.log('[Login sync] pontaje:',pontaje.length);
+    }
+    // Load dismissed alerts from user's Sheets record
+    if(cu&&cu.dismissedAlerts){
+      localStorage.setItem('itc_dismissed_alerts',JSON.stringify(cu.dismissedAlerts));
+    }
+  }).catch(()=>{});
+  document.getElementById('sName').textContent=cu.name;
+  document.getElementById('sRole').textContent=cu.isSuperAdmin?'⭐ Super Admin':cu.role==='admin'?'⚙ Administrator':cu.isLeader?'⭐ Team Leader':'👤 Angajat';
+  document.getElementById('topUser').textContent=cu.name.split(' ')[0];
+  if(cu.role==='admin'||cu.isLeader){
+    document.getElementById('overviewPanel').style.display='block';
+  }
+  if(cu.role==='admin'){
+    document.getElementById('niAdmins').style.display='flex'; // all admins can manage within their scope
+    document.getElementById('adminNav').style.display='block';
+    document.getElementById('calEmpW').style.display='flex';
+    populateCalSel();
+    populateEmpFilter();
+    if(cu.isLeader)document.getElementById('calEmpW').style.display='flex';
+    // Load settings fields
+    document.getElementById('gsUrlInp').value=GS_URL;
+    document.getElementById('ejK').value=EJ.key;
+    document.getElementById('ejS').value=EJ.svc;
+    document.getElementById('ejT').value=EJ.tpl;
+    document.getElementById('ejE').value=EJ.to;
+    document.getElementById('gsStatusWrap').innerHTML=`<span class="conn-ok">● Conectat</span>`;
+    if(EJ.key&&EJ.svc&&EJ.tpl)document.getElementById('ejStatusTxt').textContent='● Configurat';
+  }
+  nav('dash');
+}
+document.getElementById('lP').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('lU').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function doLogout(){
+  cu=null;hideEl('app');
+  showEl('loginScreen');
+  document.getElementById('lU').value='';document.getElementById('lP').value='';
+  document.getElementById('adminNav').style.display='none';document.getElementById('calEmpW').style.display='none';
+  closeSB();
+}
+
+// ═══════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════
+function nav(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
+  closeSB();
+  // Clear dash timer when navigating away from dash
+  if(id!=='dash'&&window._dashTimerInt){clearInterval(window._dashTimerInt);window._dashTimerInt=null;}
+  const fn={dash:renderDash,cal:renderCal,leave:renderLeave,pontaj:renderPontaj,aReq:renderAReq,aEmp:renderAEmp,aTeams:renderATeams,condica:()=>{renderCondica();startCondicaRefresh();},admins:renderAdmins};
+  if(fn[id])fn[id]();
+  updBadge();
+}
+
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+const MRO=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+const DRO=['Dum','Lun','Mar','Mie','Joi','Vin','Sâm'];
+function pd(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function toS(d){return d.toISOString().slice(0,10);}
+function toSLocal(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function getTeam(tid){return teams.find(t=>t.id===tid);}
+
+// ── SĂRBĂTORI LEGALE ROMÂNIA ──────────────────────────────────
+const HOLIDAYS_RO = {
+  // Fixed date holidays (MM-DD)
+  fixed: ['01-01','01-02','01-24','05-01','06-01','08-15','11-30','12-01','12-25','12-26'],
+  // Variable (Easter-based) - pre-computed for several years
+  variable: {
+    2025: ['04-18','04-21','06-08','06-09'],
+    2026: ['04-03','04-06','05-30','06-01'],
+    2027: ['04-23','04-26','06-13','06-14'],
+    2028: ['04-14','04-17','06-02','06-03'],
+  }
+};
+
+function isHoliday(dateObj){
+  const d=new Date(dateObj);
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  const mmdd=mm+'-'+dd;
+  if(HOLIDAYS_RO.fixed.includes(mmdd))return true;
+  const varY=HOLIDAYS_RO.variable[yyyy]||[];
+  return varY.includes(mmdd);
+}
+
+function getHolidayName(dateObj){
+  const d=new Date(dateObj);
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  const mmdd=mm+'-'+dd;
+  const names={
+    '01-01':'Anul Nou','01-02':'Anul Nou','01-24':'Unirea','05-01':'Ziua Muncii',
+    '06-01':'Ziua Copilului','08-15':'Sf. Maria','11-30':'Sf. Andrei',
+    '12-01':'Ziua Națională','12-25':'Crăciun','12-26':'Crăciun',
+  };
+  if(names[mmdd])return names[mmdd];
+  const varNames={
+    2025:{'04-18':'Vinerea Mare','04-21':'Paști','06-08':'Rusalii','06-09':'Rusalii'},
+    2026:{'04-03':'Vinerea Mare','04-06':'Paști','05-30':'Rusalii','06-01':'Rusalii/Ziua Copilului'},
+    2027:{'04-23':'Vinerea Mare','04-26':'Paști','06-13':'Rusalii','06-14':'Rusalii'},
+    2028:{'04-14':'Vinerea Mare','04-17':'Paști','06-02':'Rusalii','06-03':'Rusalii'},
+  };
+  return(varNames[yyyy]||{})[mmdd]||'Sărbătoare legală';
+}
+function tDisplayName(t){
+  if(!t)return'—';
+  if(t.id==='white')return t.name||'Team White';
+  return t.name||('Team '+t.id);
+}
+function showEl(id){const el=document.getElementById(id);if(el){el.style.display=el.id==='app'?'block':el.id==='loginScreen'||el.id==='setupScreen'?'flex':'flex';}}
+function hideEl(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+function setLoadMsg(m){const el=document.getElementById('loadingMsg');if(el)el.textContent=m;}
+
+function uShift(u,dateObj){
+  const dstr=toSLocal(new Date(dateObj));
+  const ls=lvStat(u.id,dstr);
+  if(ls==='Approved')return'LEAVE';
+  if(ls==='Pending')return'PEND';
+  if(u.type==='lv'||u.type==='admin')return lvShift(dateObj);
+  const t=getTeam(u.team);if(!t)return'F';
+  return getShift(t,dateObj);
+}
+function lvStat(uid,dstr){
+  const found=leaves.find(r=>String(r.uid)===String(uid)&&(r.status==='Approved'||r.status==='Pending')&&r.start<=dstr&&r.end>=dstr);
+  return found?found.status:null;
+}
+function usedDays(uid){return leaves.filter(r=>String(r.uid)===String(uid)&&r.status==='Approved').reduce((s,r)=>s+r.days,0);}
+function remDays(u){return u.leaveDays-usedDays(u.id);}
+
+function chip(s){
+  const m={D:'<span class="chip cD">☀ Zi</span>',N:'<span class="chip cN">🌙 Noapte</span>',F:'<span class="chip cF">Liber</span>',LV:'<span class="chip cLV">L-V</span>',LEAVE:'<span class="chip cLEAVE">Concediu</span>',PEND:'<span class="chip cPEND">Cerere</span>'};
+  return m[s]||'';
+}
+function shiftLbl(s){return{D:'☀️ Zi',N:'🌙 Noapte',F:'💤 Liber',LV:'📋 L-V',LEAVE:'🏖 Concediu',PEND:'⏳ Cerere'}[s]||'—';}
+
+function shiftColLabel(shiftT){
+  // Display shift type in leave table/requests
+  if(!shiftT||shiftT==='LV')return'<span class="chip cLV">L-V</span>';
+  if(shiftT==='D')return'<span class="chip cD">☀ Zi</span>';
+  if(shiftT==='N')return'<span class="chip cN">🌙 Noapte</span>';
+  if(shiftT==='MIX')return'<span class="chip cD">☀ Zi</span> <span class="chip cN">🌙 Noapte</span>';
+  return shiftT;
+}
+
+function tBadge(u){
+  const t=getTeam(u.team);
+  const dn=tDisplayName(t)||'—';
+  if(u.type==='lv')return`<span class="tbdg tw">${dn}</span>`+(u.isLeader?'<span class="leader-badge">⭐ Leader</span>':'');
+  if(u.type==='admin')return'<span class="tbdg t1">Admin</span>';
+  const cls={'1':'t1','2':'t2','3':'t3','4':'t4'}[u.team]||'tX';
+  return`<span class="tbdg ${cls}">${dn}</span>`+(u.isLeader?'<span class="leader-badge">⭐ Leader</span>':'');
+}
+function avC(id){return['#2a7a3b','#a855f7','#f59e0b','#22c55e','#ef4444','#06b6d4','#f43f5e','#84cc16'][id%8];}
+function ini(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function av(u){return`<div class="av" style="background:${avC(u.id)}">${ini(u.name)}</div>`;}
+function updBadge(){const n=leaves.filter(r=>r.status==='Pending').length;const b=document.getElementById('pBdg');b.style.display=n?'inline-flex':'none';if(n)b.textContent=n;}
+function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.classList.remove('show'),3500);}
+
+// ═══════════════════════════════════════════════════
+//  GPS — request permission at login, keep updated
+// ═══════════════════════════════════════════════════
+let gpsData=null;
+let gpsWatchId=null;
+
+function requestGPS(){
+  if(!navigator.geolocation){gpsData=null;updateGpsUI();return;}
+  if(gpsWatchId){navigator.geolocation.clearWatch(gpsWatchId);}
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      gpsData={lat:pos.coords.latitude.toFixed(5),lng:pos.coords.longitude.toFixed(5),acc:Math.round(pos.coords.accuracy)};
+      updateGpsUI();
+      // Start watching after first success
+      gpsWatchId=navigator.geolocation.watchPosition(
+        p=>{gpsData={lat:p.coords.latitude.toFixed(5),lng:p.coords.longitude.toFixed(5),acc:Math.round(p.coords.accuracy)};updateGpsUI();},
+        ()=>{},{enableHighAccuracy:true}
+      );
+    },
+    err=>{
+      gpsData=null;
+      updateGpsUI();
+      console.warn('GPS error:',err.code,err.message);
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+}
+
+function updateGpsUI(){
+  const el=document.getElementById('pontajGpsTxt');
+  const dashGps=document.getElementById('dashGpsTxt');
+  const txt=gpsData?`${gpsData.lat}, ${gpsData.lng} (±${gpsData.acc}m)`:'Locație indisponibilă';
+  if(el)el.textContent=txt;
+  if(dashGps)dashGps.textContent=gpsData?`📡 GPS activ (±${gpsData.acc}m)`:'📡 GPS indisponibil';
+}
+
+// ═══════════════════════════════════════════════════
+//  SCOPE HELPERS — filter by admin's assigned teams
+// ═══════════════════════════════════════════════════
+function scopeTeams(){
+  if(!cu)return[];
+  if(cu.role!=='admin')return null; // employees see their own data via uShift
+  if(cu.isSuperAdmin)return null;   // superadmin sees everything
+  return cu.adminTeams||[];          // local admin: only assigned teams
+}
+function isSuperAdmin(){return cu&&cu.role==='admin'&&!!cu.isSuperAdmin;}
+function inScope(teamId){
+  const sc=scopeTeams();
+  if(sc===null)return true;
+  const tid=String(teamId);
+  return sc.map(String).includes(tid);
+}
+function scopedUsers(){
+  const sc=scopeTeams();
+  if(sc===null)return users.filter(u=>u.role!=='admin');
+  return users.filter(u=>{
+    if(u.role==='admin')return false;
+    if(u.type==='lv')return sc.map(String).includes('white');
+    return inScope(u.team);
+  });
+}
+function scopedTeams(){
+  const sc=scopeTeams();
+  if(sc===null)return teams;
+  return teams.filter(t=>inScope(String(t.id)));
+}
+function scopedLeaves(){
+  const myUids=new Set(scopedUsers().map(u=>u.id));
+  const sc=scopeTeams();
+  if(sc===null)return leaves;
+  return leaves.filter(r=>myUids.has(r.uid));
+}
+// Get email for admin responsible for a user
+function getAdminEmailForUser(userId){
+  const u=users.find(x=>x.id===userId);
+  if(!u)return EJ.to;
+  // Find admin whose adminTeams includes this user's team
+  const responsible=users.find(a=>a.role==='admin'&&!a.isSuperAdmin&&a.adminTeams&&(a.adminTeams.includes(u.team)||a.adminTeams.includes(String(u.team))));
+  if(responsible&&responsible.adminEmail)return responsible.adminEmail;
+  // fallback to superadmin email
+  return EJ.to;
+}
+
+// ═══════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════
+let overviewMode='azi';
+function switchOverview(mode){
+  overviewMode=mode;
+  ['azi','sapt','luna'].forEach(m=>{
+    const el=document.getElementById('tab'+m.charAt(0).toUpperCase()+m.slice(1));
+    if(el)el.classList.toggle('active',m===mode);
+  });
+  const titleEl=document.getElementById('overviewPanelTitle');
+  if(titleEl){
+    const labels={azi:'Concedii — Azi',sapt:'Concedii — 7 zile',luna:'Concedii — 30 zile'};
+    titleEl.textContent=labels[mode]||'Concedii în perioadă';
+  }
+  renderOverview();
+}
+
+function renderOverview(){
+  if(!cu)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const toS=d=>d.toISOString().slice(0,10);
+  const todayS=toSLocal(today);
+  let startD2=new Date(today);
+  const endD=new Date(today);
+  if(overviewMode==='sapt')endD.setDate(today.getDate()+6);
+  else if(overviewMode==='luna')endD.setDate(today.getDate()+29);
+  const endS=toS(endD);
+  const startS2=toS(startD2);
+
+  // Determine which users to show (admin=all, leader=own team)
+  const isAdmin=cu.role==='admin';
+  const teamUsers=isAdmin
+    ? scopedUsers()  // admin: scoped to their teams
+    : users.filter(u=>u.team===cu.team&&u.id!==cu.id);  // leader: own team
+
+  // Find who is on approved leave in range
+  const onLeave=teamUsers.map(u=>{
+    const activeLeaves=leaves.filter(r=>String(r.uid)===String(u.id)&&r.status==='Approved'&&r.start<=endS&&r.end>=todayS);
+    if(activeLeaves.length)console.log('[Overview] Found leave for',u.name,activeLeaves);
+    if(!activeLeaves.length)return null;
+    return{user:u,leaves:activeLeaves};
+  }).filter(Boolean);
+
+  const listEl=document.getElementById('onLeaveList');
+  if(!onLeave.length){
+    listEl.innerHTML=`<div style="font-size:13px;color:var(--mut);padding:8px 0">✅ Nimeni nu este în concediu în această perioadă.</div>`;
+  }else{
+    listEl.innerHTML=onLeave.map(({user:u,leaves:uLeaves})=>{
+      const t=getTeam(u.team);
+      const tBdg=u.type==='lv'?'<span class="tbdg tw">White</span>':`<span class="tbdg ${{'1':'t1','2':'t2','3':'t3','4':'t4'}[u.team]||'tX'}">T${u.team}</span>`;
+      const leavesHtml=uLeaves.map(r=>{
+        // What shift would they have missed?
+        let shiftInfo='';
+        if(u.type==='shift'&&t){
+          const sd=pd(r.start),ed=pd(r.end);
+          const tmp=new Date(sd);let dC=0,nC=0;
+          while(tmp<=ed){const s=getShift(t,tmp);if(s==='D')dC++;else if(s==='N')nC++;tmp.setDate(tmp.getDate()+1);}
+          if(dC>0&&nC>0)shiftInfo=`<span class="chip cD" style="font-size:9px">Zi×${dC}</span> <span class="chip cN" style="font-size:9px">Noapte×${nC}</span>`;
+          else if(dC>0)shiftInfo=`<span class="chip cD" style="font-size:9px">Zi×${dC}</span>`;
+          else if(nC>0)shiftInfo=`<span class="chip cN" style="font-size:9px">Noapte×${nC}</span>`;
+        }else if(u.type==='lv'){shiftInfo='<span class="chip cLV" style="font-size:9px">L-V</span>';}
+        return`<div style="font-size:12px;color:var(--mut);margin-top:3px">${r.start} → ${r.end} ${shiftInfo}</div>`;
+      }).join('');
+      return`<div class="on-leave-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="av" style="background:${avC(u.id)};width:26px;height:26px;font-size:10px;margin:0">${ini(u.name)}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--txt)">${u.name} ${tBdg}</div>
+            ${leavesHtml}
+          </div>
+        </div>
+        <span class="chip cLEAVE" style="font-size:10px;flex-shrink:0">Concediu</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Team status today - only for admin
+  const tsEl=document.getElementById('teamStatusToday');
+  if(!isAdmin){tsEl.closest('.dash-panel').style.display='none';return;}
+  const shiftTeams=scopedTeams().filter(t=>t.type==='shift');
+  tsEl.innerHTML=shiftTeams.map(t=>{
+    const sh=getShift(t,today);
+    const shc={D:'var(--day)',N:'var(--ngt)',F:'var(--fre)'}[sh]||'var(--mut)';
+    const shl={D:'☀️ Zi',N:'🌙 Noapte',F:'💤 Liber'}[sh]||'—';
+    const tCls={'1':'t1','2':'t2','3':'t3','4':'t4'}[t.id]||'tX';
+    const mbs=users.filter(u=>u.team===t.id&&u.role!=='admin');
+    const onLeaveMbs=mbs.filter(u=>lvStat(u.id,todayS)==='Approved');
+    const onLeavePend=mbs.filter(u=>lvStat(u.id,todayS)==='Pending');
+    // Find team leader
+    const leader=mbs.find(u=>u.isLeader);
+    const leaderHtml=leader
+      ?`<span style="font-size:11px;color:var(--acl)">⭐ ${leader.name.split(' ')[0]} ${leader.name.split(' ').slice(-1)[0]}</span>`
+      :'';
+    // Team display name
+    const tName=tDisplayName(t);
+    return`<div style="padding:9px 0;border-bottom:1px solid var(--brd)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="tbdg ${tCls}">${tName}</span>
+          <span style="font-size:13px;color:${shc};font-weight:600">${shl}</span>
+          ${leaderHtml}
+          ${onLeaveMbs.length?`<span style="font-size:11px;color:var(--lv)">🏖 ${onLeaveMbs.length} în CO</span>`:''}
+          ${onLeavePend.length?`<span style="font-size:11px;color:var(--pnd)">⏳ ${onLeavePend.length} cerere</span>`:''}
+        </div>
+        <span style="font-size:12px;color:var(--mut);flex-shrink:0">${mbs.length} membri</span>
+      </div>
+      ${t.note?`<div style="font-size:11px;color:var(--mut);margin-top:3px;padding-left:4px">${t.note}</div>`:''}
+    </div>`;
+  }).join('')+(shiftTeams.length?'':`<div style="font-size:13px;color:var(--mut)">Nicio echipă configurată.</div>`);
+}
+
+function renderDash(){
+  if(!cu)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const s=uShift(cu,today);
+  document.getElementById('dTitle').textContent='Bună ziua, '+cu.name.split(' ')[0]+'! 👋';
+  if(cu.isLeader)document.getElementById('dSub').textContent='⭐ Team Leader — Team '+cu.team;
+  document.getElementById('dToday').textContent=shiftLbl(s);
+  const rem=remDays(cu);
+  document.getElementById('dLeave').textContent=rem+' zile';
+  document.getElementById('dLeave').style.color=rem>10?'var(--fre)':rem>5?'var(--lv)':'var(--ngt)';
+  document.getElementById('dPend').textContent=leaves.filter(r=>String(r.uid)===String(cu.id)&&r.status==='Pending').length;
+  const myTeamObj=getTeam(cu.team);
+  document.getElementById('dTeam').textContent=cu.type==='admin'?'Admin':myTeamObj?tDisplayName(myTeamObj):(cu.team||'—');
+  // Alerte neconcordanțe
+  if(cu.role==='admin'||cu.isLeader)detectAlerts();
+  // Pontaj quick action in dashboard
+  renderDashPontaj();
+
+  // Overview for admin/leader
+  if(cu.role==='admin'||cu.isLeader)renderOverview();
+
+  let wh='';
+  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);const sh=uShift(cu,d);
+    wh+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--brd)">
+      <span style="font-size:13px;${i===0?'color:var(--acl);font-weight:700':'color:var(--dim)'}">${DRO[d.getDay()]} ${d.getDate()}</span>${chip(sh)}</div>`;}
+  document.getElementById('weekShifts').innerHTML=wh;
+  const used=usedDays(cu.id),total=cu.leaveDays,pct=total?Math.min(100,Math.round(used/total*100)):0;
+  document.getElementById('lbalW').innerHTML=`<div class="lbwrap"><div class="lbhead"><span style="font-size:13px;font-weight:500">Utilizate</span><span style="font-size:13px;font-weight:600">${used}/${total}</span></div><div class="lbar"><div class="lbarfill" style="width:${pct}%"></div></div></div>
+  <div style="font-size:13px;color:var(--mut);margin-top:6px">Rămase: <strong style="color:${rem>10?'var(--fre)':rem>5?'var(--lv)':'var(--ngt)'}">${rem} zile</strong></div>`;
+  const myR=leaves.filter(r=>String(r.uid)===String(cu.id)).slice(-3).reverse();
+  if(!myR.length){document.getElementById('recReq').innerHTML='<div style="font-size:13px;color:var(--mut)">Nicio cerere încă.</div>';return;}
+  document.getElementById('recReq').innerHTML=myR.map(r=>{
+    const sc=r.status==='Approved'?'sa':r.status==='Rejected'?'sr':'sp';
+    const sl=r.status==='Approved'?'✓ Aprobat':r.status==='Rejected'?'✕ Respins':'⏳ Așteptare';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px">
+      <span style="color:var(--dim)">${r.start} → ${r.end} (${r.days}z)</span><span class="sbdg ${sc}">${sl}</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════════
+function populateEmpFilter(){
+  const sel=document.getElementById('empFil');
+  const sc=scopeTeams();
+  const myTeams=sc===null?teams:teams.filter(t=>sc.includes(t.id)||sc.includes(String(t.id)));
+  sel.innerHTML='<option value="all">Toate echipele</option>'+
+    myTeams.filter(t=>t.type==='shift').map(t=>`<option value="${t.id}">Team ${t.id}</option>`).join('')+
+    (myTeams.find(t=>t.id==='white')?'<option value="white">Team White</option>':'');
+}
+
+function populateCalSel(){
+  const sel=document.getElementById('calEmpSel');
+  sel.innerHTML='<option value="me">— Eu —</option>'+
+    scopedUsers().map(u=>`<option value="${u.id}">${u.name} (${tDisplayName(getTeam(u.team))||'—'})</option>`).join('');
+}
+function calPrev(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
+function calNext(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
+function renderCal(){
+  document.getElementById('calLbl').textContent=MRO[calM]+' '+calY;
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  DRO.forEach(d=>{const el=document.createElement('div');el.className='caldow';el.textContent=d;grid.appendChild(el);});
+  const firstDay=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const today=new Date();today.setHours(0,0,0,0);
+  let target=cu;
+  let calEmpSelVal='me';
+  if(cu.role==='admin'||cu.isLeader){const sel=document.getElementById('calEmpSel');if(sel){calEmpSelVal=sel.value;if(sel.value!=='me'){const uid=parseInt(sel.value);target=users.find(u=>u.id===uid)||cu;}}}
+  for(let i=new Date(calY,calM,0).getDate()-firstDay+1;i<=new Date(calY,calM,0).getDate();i++){const c=document.createElement('div');c.className='calcell other';c.innerHTML=`<div class="daynum">${i}</div>`;grid.appendChild(c);}
+  for(let d=1;d<=dim;d++){
+    const dateObj=new Date(calY,calM,d);const isT=dateObj.getTime()===today.getTime();
+    // Pass local date string to avoid UTC shift issues
+    const localDStr=toSLocal(dateObj);
+    const sh=uShift(target,dateObj);const cellEl=document.createElement('div');
+    cellEl.className='calcell'+(isT?' today':'');
+    const isHol=isHoliday(dateObj);
+    const holName=isHol?getHolidayName(dateObj):'';
+    let cellContent=`<div class="daynum">${d}${isHol?`<span style="font-size:8px;color:var(--lv);margin-left:3px" title="${holName}">🔴</span>`:''}</div>${chip(sh)}`;
+    if(isHol)cellContent+=`<div style="font-size:10px;color:#b45309;font-weight:600;margin-top:2px;line-height:1.3">${holName}</div>`;
+    // Show approved leaves in calendar cells
+    // Admin/leader: show who's on leave (all team members)
+    // Employee: show only their own leave (already via uShift=LEAVE)
+    if(cu.role==='admin'||cu.isLeader){
+      if(calEmpSelVal==='me'){
+        // Viewing own calendar - show team leave info
+        const dStr2=toSLocal(dateObj);
+        const onLeaveToday=scopedUsers().filter(u=>String(u.id)!==String(cu.id)&&lvStat(u.id,dStr2)==='Approved');
+        if(onLeaveToday.length>0){
+          const names=onLeaveToday.slice(0,2).map(u=>u.name).join(', ');
+          const more=onLeaveToday.length>2?` +${onLeaveToday.length-2}`:'';
+          cellContent+=`<div style="font-size:10px;color:#92400e;font-weight:600;background:#fef3c7;border-radius:3px;padding:1px 3px;margin-top:2px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🏖 ${names}${more}</div>`;
+        }
+      }
+    }
+    cellEl.innerHTML=cellContent;
+    grid.appendChild(cellEl);}
+  const rem=(firstDay+dim)%7===0?0:7-(firstDay+dim)%7;
+  for(let i=1;i<=rem;i++){const c=document.createElement('div');c.className='calcell other';c.innerHTML=`<div class="daynum">${i}</div>`;grid.appendChild(c);}
+}
+
+// ═══════════════════════════════════════════════════
+//  MY LEAVE
+// ═══════════════════════════════════════════════════
+function renderLeave(){
+  const used=usedDays(cu.id),rem=remDays(cu);
+  document.getElementById('lvTot').textContent=cu.leaveDays;
+  document.getElementById('lvUsd').textContent=used;
+  document.getElementById('lvRem').textContent=rem;
+  const myR=leaves.filter(r=>String(r.uid)===String(cu.id)).reverse();
+  const tb=document.getElementById('myLvTb');
+  if(!myR.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:20px">Nicio cerere</td></tr>';return;}
+  tb.innerHTML=myR.map(r=>{
+    const sc=r.status==='Approved'?'sa':r.status==='Rejected'?'sr':'sp';
+    const sl=r.status==='Approved'?'✓ Aprobat':r.status==='Rejected'?'✕ Respins':'⏳ Așteptare';
+    return`<tr><td style="font-size:13px">${r.start} → ${r.end}</td><td>${shiftColLabel(r.shiftT)}</td><td><strong>${r.days}</strong></td><td style="font-size:12px">${r.type}</td><td><span class="sbdg ${sc}">${sl}</span></td><td style="color:var(--mut);font-size:12px">${r.anote||'—'}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  NEW LEAVE
+// ═══════════════════════════════════════════════════
+document.getElementById('lvS').addEventListener('change',calcLeave);
+document.getElementById('lvE').addEventListener('change',calcLeave);
+
+function calcLeave(){
+  const sStr=document.getElementById('lvS').value,eStr=document.getElementById('lvE').value;
+  const box=document.getElementById('lvCalcBox'),txt=document.getElementById('lvCalcTxt');
+  const mini=document.getElementById('lvMiniCal');
+  if(!sStr||!eStr){txt.innerHTML='Selectează perioada pentru a vedea turele și calcula zilele deduse.';txt.style.color='var(--dim)';box.dataset.valid='0';mini.innerHTML='<span style="color:var(--mut)">Selectează o perioadă în stânga.</span>';return;}
+  if(eStr<sStr){txt.innerHTML='⚠️ Data de sfârșit trebuie să fie după start.';txt.style.color='var(--ngt)';box.dataset.valid='0';mini.innerHTML='';return;}
+  // Check if start or end is a public holiday
+  const sD2=pd(sStr),eD2=pd(eStr);
+  if(isHoliday(sD2)){txt.innerHTML='🔴 '+getHolidayName(sD2)+' este zi liberă legală — nu se poate lua concediu în această zi.';txt.style.color='var(--ngt)';box.dataset.valid='0';mini.innerHTML='';return;}
+  if(isHoliday(eD2)){txt.innerHTML='🔴 '+getHolidayName(eD2)+' este zi liberă legală — nu se poate lua concediu în această zi.';txt.style.color='var(--ngt)';box.dataset.valid='0';mini.innerHTML='';return;}
+  const rem=remDays(cu);
+  // Admin sau Team White — program L-V
+  if(cu.type==='lv'||cu.type==='admin'){
+    let c=0,rows='';const tmp=pd(sStr),e=pd(eStr);
+    while(tmp<=e){const dw=tmp.getDay(),ok=dw!==0&&dw!==6&&!isHoliday(tmp);if(ok)c++;
+      const isHol2=isHoliday(tmp);
+      const dispChip=isHol2?`<span class="chip" style="background:#fef3c7;color:#92400e;font-size:12px;padding:3px 8px">🔴 ${getHolidayName(tmp)}</span>`:ok?'<span class="chip cLV" style="font-size:12px;padding:3px 8px">L-V</span>':'<span class="chip cF" style="font-size:12px;padding:3px 8px;background:#dcfce7;color:#15803d">💤 Liber</span>';
+      if(isHol2&&ok){c=Math.max(0,c-1);} // don't count holidays as working days
+      rows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--brd)"><span style="font-size:13px;color:var(--dim)">${DRO[dw]} ${tmp.getDate()}.${String(tmp.getMonth()+1).padStart(2,'0')}</span>${dispChip}</div>`;
+      tmp.setDate(tmp.getDate()+1);}
+    mini.innerHTML=rows;const ok2=c>0&&c<=rem;
+    txt.innerHTML=`<strong style="color:var(--wht)">Team White</strong> — zile L-V: <strong style="color:${ok2?'var(--fre)':'var(--ngt)'}">${c}</strong> | Rămase: <strong style="color:${ok2?'var(--fre)':'var(--ngt)'}">${rem-c}</strong>`;
+    box.dataset.days=c;box.dataset.valid=ok2?'1':'0';box.dataset.sht='LV';return;
+  }
+  const t=cu.team?getTeam(cu.team):null;
+  if(!t){txt.innerHTML='⚠️ Echipa ta nu a fost configurată de admin.';txt.style.color='var(--ngt)';box.dataset.valid='0';mini.innerHTML='';return;}
+  let total=0,rows='',cnt={D:0,N:0,F:0};
+  const tmp=pd(sStr),e=pd(eStr);
+  while(tmp<=e){
+    const s=getShift(t,tmp);const cost=s==='D'?1:s==='N'?2:0;total+=cost;cnt[s]=(cnt[s]||0)+1;
+    const isHolS=isHoliday(tmp);
+    const holLabelS=isHolS?`<span style="font-size:9px;color:var(--lv)"> 🔴${getHolidayName(tmp)}</span>`:'';
+    const bgCol=s==='D'?'#dbeafe':s==='N'?'#fee2e2':'#dcfce7';
+    const txCol=s==='D'?'#1d4ed8':s==='N'?'#b91c1c':'#15803d';
+    const chipH=s==='D'?`<span class="chip cD" style="background:${bgCol};color:${txCol};font-size:12px;padding:3px 8px">☀ Zi −1z${holLabelS}</span>`:s==='N'?`<span class="chip cN" style="background:${bgCol};color:${txCol};font-size:12px;padding:3px 8px">🌙 Noapte −2z${holLabelS}</span>`:`<span class="chip cF" style="background:${bgCol};color:${txCol};font-size:12px;padding:3px 8px">💤 Liber${holLabelS}</span>`;
+    rows+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--brd)"><span style="font-size:13px;color:var(--dim)">${DRO[tmp.getDay()]} ${tmp.getDate()}.${String(tmp.getMonth()+1).padStart(2,'0')}</span>${chipH}</div>`;
+    tmp.setDate(tmp.getDate()+1);}
+  mini.innerHTML=rows;
+  if(total===0){txt.innerHTML='ℹ️ Perioada conține doar zile libere — nu se deduc zile.';txt.style.color='var(--dim)';box.dataset.valid='0';return;}
+  const ok=total<=rem;
+  let parts=[];
+  if(cnt.D>0)parts.push(`<span style="color:var(--day)">☀ Zi ×${cnt.D}</span> = ${cnt.D}z`);
+  if(cnt.N>0)parts.push(`<span style="color:var(--ngt)">🌙 Noapte ×${cnt.N}</span> = ${cnt.N*2}z`);
+  if(cnt.F>0)parts.push(`<span style="color:var(--fre)">Liber ×${cnt.F}</span> = 0z`);
+  txt.innerHTML=`${parts.join(' + ')} → <strong style="color:${ok?'var(--fre)':'var(--ngt)'}">${total} zile deduse</strong><br><span style="color:var(--mut);font-size:12px">Disponibil: ${rem} | Rămase: <strong style="color:${ok?'var(--fre)':'var(--ngt)'}">${rem-total}</strong></span>`;
+  box.dataset.days=total;box.dataset.valid=ok?'1':'0';
+  box.dataset.sht=cnt.D>0&&cnt.N>0?'MIX':cnt.N>0?'N':'D';
+}
+
+async function submitLeave(){
+  const sStr=document.getElementById('lvS').value,eStr=document.getElementById('lvE').value;
+  const type=document.getElementById('lvTy').value,note=document.getElementById('lvNo').value;
+  const box=document.getElementById('lvCalcBox'),btn=document.getElementById('lvBtn');
+  if(!sStr||!eStr){toast('Completează perioadele!','err');return;}
+  if(box.dataset.valid!=='1'){toast('Perioadă invalidă sau sold insuficient!','err');return;}
+  const days=parseInt(box.dataset.days)||0,shiftT=box.dataset.sht||'D';
+  btn.innerHTML='<div class="spin"></div> Se trimite...';btn.disabled=true;
+  try{
+    const newLeave={id:Date.now(),uid:cu.id,start:sStr,end:eStr,days,shiftT,type,note,status:'Pending',anote:''};
+    const res=await gsCall({action:'addLeave',leave:newLeave});
+    if(res.ok===false)throw new Error(res.error||'err');
+    leaves.push(newLeave);cacheLocal();
+    const adminTo=getAdminEmailForUser(cu.id)||EJ.to;
+    const teamLabel=cu.type==='lv'?'Team White':cu.type==='admin'?'Admin':'Team '+(cu.team||'');
+    await sendEmail({empName:cu.name,team:teamLabel,start:sStr,end:eStr,days,shiftT,type,note},adminTo);
+    toast('✅ Cerere trimisă!'+(EJ.key?' Email la admin.':''),'ok');
+    document.getElementById('lvS').value='';document.getElementById('lvE').value='';document.getElementById('lvNo').value='';
+    document.getElementById('lvCalcTxt').innerHTML='Selectează perioada pentru a vedea turele și calcula zilele deduse.';
+    document.getElementById('lvMiniCal').innerHTML='<span style="color:var(--mut)">Selectează o perioadă în stânga.</span>';
+    box.dataset.valid='0';updBadge();
+  }catch(e){toast('⚠ Eroare la trimitere: '+e.message,'err');}
+  btn.innerHTML='📤 Trimite cererea';btn.disabled=false;
+}
+
+// ═══════════════════════════════════════════════════
+//  ADMIN: REQUESTS
+// ═══════════════════════════════════════════════════
+function renderAReq(){
+  const f=document.getElementById('reqFil').value;
+  let reqs=[...scopedLeaves()];if(f!=='all')reqs=reqs.filter(r=>r.status===f);reqs.reverse();
+  const tb=document.getElementById('aReqTb');
+  if(!reqs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--mut);padding:20px">Nicio cerere</td></tr>';return;}
+  tb.innerHTML=reqs.map(r=>{
+    const u=users.find(x=>x.id===r.uid);if(!u)return'';
+    const sc=r.status==='Approved'?'sa':r.status==='Rejected'?'sr':'sp';
+    const sl=r.status==='Approved'?'✓ Aprobat':r.status==='Rejected'?'✕ Respins':'⏳ Așteptare';
+    let act='';
+    if(r.status==='Pending'){
+      act=`<button class="btn bok bsm" onclick="openRev(${r.id})">Revizuire</button>`;
+    }else if(r.status==='Approved'){
+      act=`<div class="abs">
+        <button class="btn bgh bsm" onclick="openEditLeave(${r.id})">✏️ Modifică</button>
+        <button class="btn bdn bsm" onclick="deleteLeave(${r.id})">🗑 Șterge</button>
+      </div>`;
+    }else{
+      act=`<span style="font-size:12px;color:var(--mut)">${r.anote||'—'}</span>`;
+    }
+    return`<tr><td><div class="erow">${av(u)}<span class="ename">${u.name}</span></div></td><td>${tBadge(u)}</td><td style="font-size:13px">${r.start} → ${r.end}</td><td>${shiftColLabel(r.shiftT)}</td><td><strong>${r.days}</strong></td><td style="font-size:12px">${r.type}</td><td><span class="sbdg ${sc}">${sl}</span></td><td>${act}</td></tr>`;
+  }).join('');
+}
+
+function openRev(id){
+  revId=id;const r=leaves.find(x=>x.id===id),u=users.find(x=>x.id===r.uid);
+  const tl=u.type==='lv'?'Team White':'Team '+u.team;
+  document.getElementById('revDet').innerHTML=`<strong style="color:var(--txt)">${u.name}</strong> — ${tl}<br>Perioadă: <strong>${r.start} → ${r.end}</strong><br>Schimb: ${shiftColLabel(r.shiftT)} | Zile deduse: <strong>${r.days}</strong><br>Tip: ${r.type}${r.note?'<br>Obs: '+r.note:''}`;
+  document.getElementById('revNote').value='';openMod('revMod');
+}
+
+// ── DELETE APPROVED LEAVE ─────────────────────────────────────
+async function deleteLeave(id){
+  const r=leaves.find(x=>x.id===id);
+  if(!r)return;
+  const u=users.find(x=>x.id===r.uid);
+  const uName=u?u.name:'angajatul';
+  if(!confirm(`Ștergi cererea aprobată pentru ${uName}?\n${r.start} → ${r.end} (${r.days} zile)\n\nZilele vor fi returnate în contul angajatului.`))return;
+  try{
+    // Remove from sheets
+    const res=await gsCall({action:'deleteLeave',id:r.id});
+    if(res.ok===false)throw new Error(res.error);
+    // Remove locally
+    leaves=leaves.filter(l=>l.id!==id);
+    cacheLocal();
+    toast(`🗑 Cerere ștearsă — ${r.days} zile returnate în contul lui ${uName}.`,'ok');
+    updBadge();renderAReq();renderDash();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+}
+
+// ── EDIT APPROVED LEAVE ───────────────────────────────────────
+let editingLeaveId=null;
+function openEditLeave(id){
+  editingLeaveId=id;
+  const r=leaves.find(x=>x.id===id);
+  const u=users.find(x=>x.id===r.uid);
+  if(!r||!u)return;
+  document.getElementById('editLeaveInfo').innerHTML=
+    `<strong style="color:var(--txt)">${u.name}</strong> — ${tBadge(u)}<br>
+    Cerere actuală: <strong>${r.start} → ${r.end}</strong> (${r.days} zile deduse)`;
+  document.getElementById('elStart').value=r.start;
+  document.getElementById('elEnd').value=r.end;
+  document.getElementById('elType').value=r.type;
+  document.getElementById('elNote').value=r.note||'';
+  document.getElementById('elCalcTxt').innerHTML='Modifică datele pentru a recalcula.';
+  document.getElementById('elCalcBox').dataset.days=r.days;
+  document.getElementById('elCalcBox').dataset.valid='1';
+  openMod('editLeaveMod');
+  // Attach listeners
+  document.getElementById('elStart').oninput=calcEditLeave;
+  document.getElementById('elEnd').oninput=calcEditLeave;
+}
+
+function calcEditLeave(){
+  const sStr=document.getElementById('elStart').value;
+  const eStr=document.getElementById('elEnd').value;
+  const box=document.getElementById('elCalcBox');
+  const txt=document.getElementById('elCalcTxt');
+  if(!sStr||!eStr){txt.innerHTML='Selectează perioada.';box.dataset.valid='0';return;}
+  if(eStr<sStr){txt.innerHTML='⚠️ Data sfârșit trebuie să fie după start.';box.dataset.valid='0';return;}
+  const r=leaves.find(x=>x.id===editingLeaveId);
+  const u=users.find(x=>x.id===r.uid);
+  // Calc new days
+  let total=0;
+  if(u.type==='lv'||u.type==='admin'){
+    const d=pd(sStr),e=pd(eStr);
+    while(d<=e){if(d.getDay()!==0&&d.getDay()!==6)total++;d.setDate(d.getDate()+1);}
+  }else{
+    const t=getTeam(u.team);
+    if(t){const d=pd(sStr),e=pd(eStr);while(d<=e){const s=getShift(t,d);total+=s==='D'?1:s==='N'?2:0;d.setDate(d.getDate()+1);}}
+  }
+  // Available = current balance + old days (since we'll recalculate)
+  const used=leaves.filter(x=>x.uid===u.id&&x.status==='Approved'&&x.id!==editingLeaveId).reduce((s,x)=>s+x.days,0);
+  const available=u.leaveDays-used;
+  const ok=total>0&&total<=available;
+  txt.innerHTML=`Zile noi deduse: <strong style="color:${ok?'var(--fre)':'var(--ngt)'}">${total}</strong> | Disponibil: <strong>${available}</strong>`;
+  box.dataset.days=total;box.dataset.valid=ok?'1':'0';
+}
+
+async function saveEditLeave(){
+  const r=leaves.find(x=>x.id===editingLeaveId);if(!r)return;
+  const box=document.getElementById('elCalcBox');
+  const sStr=document.getElementById('elStart').value;
+  const eStr=document.getElementById('elEnd').value;
+  const type=document.getElementById('elType').value;
+  const note=document.getElementById('elNote').value;
+  if(box.dataset.valid!=='1'){toast('Perioadă invalidă sau sold insuficient!','err');return;}
+  const days=parseInt(box.dataset.days)||r.days;
+  const btn=document.getElementById('saveEditLeaveBtn');
+  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  try{
+    r.start=sStr;r.end=eStr;r.days=days;r.type=type;r.note=note;
+    // status rămâne Approved
+    const res=await gsCall({action:'updateLeave',id:r.id,status:'Approved',anote:r.anote,start:sStr,end:eStr,days,type,note});
+    if(res.ok===false)throw new Error(res.error);
+    cacheLocal();
+    closeMod('editLeaveMod');
+    toast('✅ Cerere modificată și rămâne aprobată!','ok');
+    renderAReq();renderDash();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+  btn.innerHTML='💾 Salvează modificarea';btn.disabled=false;
+}
+
+async function revLeave(status){
+  const r=leaves.find(x=>x.id===revId);if(!r)return;
+  const note=document.getElementById('revNote').value;
+  closeMod('revMod');
+  try{
+    const res=await gsCall({action:'updateLeave',id:r.id,status,anote:note});
+    if(res.ok===false)throw new Error(res.error);
+    r.status=status;r.anote=note;cacheLocal();
+    toast(status==='Approved'?'✅ Cerere aprobată!':'✕ Cerere respinsă.',status==='Approved'?'ok':'err');
+    updBadge();renderAReq();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════════════════════
+//  ADMIN: EMPLOYEES
+// ═══════════════════════════════════════════════════
+function renderAEmp(){
+  // Rebuild filter options from scoped teams
+  const fil=document.getElementById('empFil');
+  const curVal=fil.value;
+  fil.innerHTML='<option value="all">Toate echipele</option>';
+  scopedTeams().forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=tDisplayName(t);fil.appendChild(o);});
+  if([...fil.options].some(o=>o.value===curVal))fil.value=curVal;
+  const f=fil.value;
+  let emps=scopedUsers();
+  if(f!=='all'){if(f==='white')emps=emps.filter(u=>u.type==='lv');else emps=emps.filter(u=>u.team===f);}
+  const tb=document.getElementById('aEmpTb');
+  if(!emps.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--mut);padding:20px">Niciun angajat</td></tr>';return;}
+  tb.innerHTML=emps.map(u=>{
+    const used=usedDays(u.id),rem=remDays(u);
+    const rc=rem>10?'var(--fre)':rem>5?'var(--lv)':'var(--ngt)';
+    return`<tr>
+      <td><div class="erow">${av(u)}<span class="ename">${u.name}</span></div></td>
+      <td style="font-size:12px;color:var(--mut)">${u.user}</td>
+      <td>${tBadge(u)}</td>
+      <td><input type="number" value="${u.leaveDays}" min="0" max="60" style="width:56px;background:var(--sur2);border:1px solid var(--brd);border-radius:6px;padding:4px 7px;color:var(--txt);font-size:13px;outline:none" onchange="updDays(${u.id},this.value)"></td>
+      <td style="color:var(--lv);font-weight:600">${used}</td>
+      <td style="color:${rc};font-weight:700">${rem}</td>
+      <td><div class="abs">
+        <button class="btn bgh bsm" onclick="openEdit(${u.id})">✏️</button>
+        <button class="btn bgh bsm" onclick="rstPass(${u.id})" title="Resetare parolă">🔑</button>
+        <button class="btn bdn bsm" onclick="delEmp(${u.id})">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function updDays(id,v){
+  const u=users.find(x=>x.id===id);if(!u)return;
+  u.leaveDays=parseInt(v)||0;
+  try{await gsCall({action:'updateUser',user:u});cacheLocal();toast('💾 Sold actualizat — '+u.name);}
+  catch{toast('⚠ Eroare la salvare','err');}
+}
+
+async function rstPass(id){
+  const u=users.find(x=>x.id===id);if(!u)return;
+  const np='pass'+Math.floor(1000+Math.random()*9000);u.pass=np;
+  try{await gsCall({action:'updateUser',user:u});cacheLocal();toast(`🔑 ${u.name}: parolă nouă → ${np}`);}
+  catch{toast('⚠ Eroare la salvare','err');}
+}
+
+async function delEmp(id){
+  if(!confirm('Ștergi angajatul?'))return;
+  try{
+    const res=await gsCall({action:'deleteUser',id});
+    if(res.ok===false)throw new Error(res.error);
+    const i=users.findIndex(u=>u.id===id);if(i>-1){const n=users[i].name;users.splice(i,1);cacheLocal();toast('🗑 '+n+' șters.');renderAEmp();populateCalSel();}
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+}
+
+function populateTeamSel(id){document.getElementById(id).innerHTML=teams.filter(t=>t.type==='shift').map(t=>`<option value="${t.id}">${tDisplayName(t)}${t.note?' — '+t.note:''}</option>`).join('');}
+function togTeam(wId,sId){document.getElementById(wId).style.display=document.getElementById(sId).value==='shift'?'block':'none';}
+function toggleLeaderEmail(){
+  const checked=document.getElementById('eLeader').checked;
+  document.getElementById('eLeaderEmailWrap').style.display=checked?'block':'none';
+}
+function toggleEditLeaderEmail(){
+  const checked=document.getElementById('edLeader').checked;
+  document.getElementById('edLeaderEmailWrap').style.display=checked?'block':'none';
+}
+
+function openEmpMod(){
+  populateTeamSel('eTeam');
+  ['eFn','eLn','eU'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('eP').value='';document.getElementById('eDays').value=21;
+  document.getElementById('eType').value='shift';document.getElementById('eTeamW').style.display='block';
+  document.getElementById('eLeader').checked=false;
+  document.getElementById('eLeaderEmail').value='';
+  document.getElementById('eLeaderEmailWrap').style.display='none';
+  openMod('empMod');
+}
+
+async function saveEmp(){
+  const fn=document.getElementById('eFn').value.trim(),ln=document.getElementById('eLn').value.trim();
+  const user=document.getElementById('eU').value.trim(),pass=document.getElementById('eP').value;
+  const type=document.getElementById('eType').value,team=type==='shift'?document.getElementById('eTeam').value:'white';
+  const days=parseInt(document.getElementById('eDays').value)||21;
+  if(!fn||!ln||!user||!pass){toast('Completează toate câmpurile!','err');return;}
+  if(users.find(u=>u.user===user)){toast('Username deja existent!','err');return;}
+  const btn=document.getElementById('saveEmpBtn');btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  try{
+    const isLeader=document.getElementById('eLeader').checked;
+    const leaderEmail=isLeader?document.getElementById('eLeaderEmail').value.trim():'';
+    const pin=document.getElementById('ePin').value;
+    const newUser={id:Date.now(),user,pass,role:'employee',name:fn+' '+ln,team,type,leaveDays:days,isLeader,leaderEmail,pin};
+    const res=await gsCall({action:'addUser',user:newUser});
+    if(res.ok===false)throw new Error(res.error);
+    users.push(newUser);cacheLocal();
+    closeMod('empMod');toast('✅ '+fn+' '+ln+' adăugat!','ok');renderAEmp();populateCalSel();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+  btn.innerHTML='💾 Salvează';btn.disabled=false;
+}
+
+function openEdit(id){
+  editUid=id;const u=users.find(x=>x.id===id);if(!u)return;
+  populateTeamSel('edTeam');
+  document.getElementById('edNm').value=u.name;document.getElementById('edType').value=u.type==='lv'?'lv':'shift';
+  document.getElementById('edDays').value=u.leaveDays;document.getElementById('edTeamW').style.display=u.type==='shift'?'block':'none';
+  document.getElementById('edLeader').checked=!!u.isLeader;
+  document.getElementById('edPin').value='';
+  document.getElementById('edLeaderEmail').value=u.leaderEmail||'';
+  document.getElementById('edLeaderEmailWrap').style.display=u.isLeader?'block':'none';
+  if(u.type==='shift')setTimeout(()=>document.getElementById('edTeam').value=u.team,50);
+  openMod('editMod');
+}
+
+async function saveEdit(){
+  const u=users.find(x=>x.id===editUid);if(!u)return;
+  u.name=document.getElementById('edNm').value.trim()||u.name;
+  u.type=document.getElementById('edType').value;
+  u.team=u.type==='shift'?document.getElementById('edTeam').value:'white';
+  u.leaveDays=parseInt(document.getElementById('edDays').value)||u.leaveDays;
+  u.isLeader=document.getElementById('edLeader').checked;
+  u.leaderEmail=u.isLeader?document.getElementById('edLeaderEmail').value.trim():'';
+  const newPin=document.getElementById('edPin').value;
+  if(newPin)u.pin=newPin;
+  const btn=document.getElementById('saveEditBtn');btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  try{
+    await gsCall({action:'updateUser',user:u});cacheLocal();
+    closeMod('editMod');toast('✅ Angajat actualizat!','ok');renderAEmp();populateCalSel();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+  btn.innerHTML='💾 Salvează';btn.disabled=false;
+}
+
+// ═══════════════════════════════════════════════════
+//  ADMIN: TEAMS
+// ═══════════════════════════════════════════════════
+function renderATeams(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const tcs={'1':'t1','2':'t2','3':'t3','4':'t4'};
+  document.getElementById('teamsGrid').innerHTML=scopedTeams().filter(t=>t.type==='shift').map(t=>{
+    const sh=getShift(t,today);
+    const shc={D:'var(--day)',N:'var(--ngt)',F:'var(--fre)'}[sh]||'var(--mut)';
+    const cls=tcs[t.id]||'tX';
+    const mbs=users.filter(u=>u.team===t.id);
+    const mhtml=mbs.length?mbs.map(u=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">${av(u)}<span style="font-size:13px">${u.name}</span></div>`).join(''):`<div style="font-size:12px;color:var(--mut)">Fără membri</div>`;
+    const refNote=t.refDate?`<div style="font-size:11px;color:var(--mut);margin-top:2px">Ref: ${t.refDate}</div>`:`<div style="font-size:11px;color:rgba(239,68,68,.7);margin-top:2px">⚠ Configurează ciclul</div>`;
+    return`<div class="tcard">
+      <div class="tcard-top">
+        <div><span class="tbdg ${cls}">${tDisplayName(t)}</span>${t.note?`<div style="font-size:11px;color:var(--mut);margin-top:3px">${t.note}</div>`:''}${refNote}</div>
+        <div style="text-align:right"><div style="font-size:15px;font-weight:700;color:${shc}">${{D:'☀️ Zi',N:'🌙 Noapte',F:'💤 Liber'}[sh]||'—'}</div><div style="font-size:11px;color:var(--mut)">azi</div></div>
+      </div>
+      <div class="divider" style="margin:10px 0"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Membri (${mbs.length})</div>
+      ${mhtml}
+      <div class="divider" style="margin:10px 0"></div>
+      <div class="abs">
+        <button class="btn bgh bsm" onclick="openTeamMod('${t.id}')">✏️ Redenumire</button>
+        <button class="btn bgh bsm" onclick="openCfg('${t.id}')">⚙️ Ciclu</button>
+        <button class="btn bdn bsm" onclick="delTeam('${t.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  const whiteTeam=getTeam('white');
+  const whiteTitle=document.getElementById('whiteCardTitle');
+  if(whiteTitle&&whiteTeam)whiteTitle.textContent=(whiteTeam.name||'Team White')+' — Program Luni–Vineri';
+  const wm=scopedUsers().filter(u=>u.type==='lv');
+  document.getElementById('whiteM').innerHTML=wm.length
+    ?`<div style="display:flex;flex-wrap:wrap;gap:9px">${wm.map(u=>`<div style="display:flex;align-items:center;gap:7px;background:var(--sur2);border:1px solid var(--brd);border-radius:8px;padding:7px 12px">${av(u)}<span style="font-size:13px;font-weight:600">${u.name}</span></div>`).join('')}</div>`
+    :'<div style="font-size:13px;color:var(--mut)">Niciun angajat în Team White.</div>';
+  const whiteEl=document.getElementById('whiteM');
+  if(whiteEl){
+    const renBtn=document.createElement('div');
+    renBtn.style.cssText='margin-top:12px';
+    renBtn.innerHTML=`<button class="btn bgh bsm" onclick="openTeamMod('white')">✏️ Redenumire Team White</button>`;
+    whiteEl.appendChild(renBtn);
+  }
+}
+
+let editingTeamId=null;
+function openTeamMod(tid=null){
+  editingTeamId=tid;
+  if(tid){
+    const t=getTeam(tid);
+    document.getElementById('teamModTitle').textContent='✏️ Redenumire — '+tDisplayName(t);
+    document.getElementById('tName').value=t.name||'';
+    document.getElementById('tNote').value=t.note||'';
+    document.getElementById('saveTeamBtn').textContent='💾 Salvează';
+  }else{
+    document.getElementById('teamModTitle').textContent='🏷 Echipă nouă';
+    document.getElementById('tName').value='';
+    document.getElementById('tNote').value='';
+    document.getElementById('saveTeamBtn').textContent='✅ Creează';
+  }
+  openMod('teamMod');
+}
+async function saveTeam(){
+  const note=document.getElementById('tNote').value.trim();
+  const name=document.getElementById('tName').value.trim();
+
+  // ── EDITARE / REDENUMIRE echipă existentă ──
+  if(editingTeamId){
+    const t=getTeam(editingTeamId);
+    if(!t){toast('Echipa nu a fost găsită!','err');return;}
+    if(!name){toast('Introdu un nume!','err');return;}
+    t.name=name;
+    t.note=note;
+    try{
+      await gsCall({action:'saveTeams',teams});
+      cacheLocal();
+      closeMod('teamMod');
+      toast('✅ Echipă redenumită: '+name,'ok');
+      renderATeams();
+      renderAEmp();
+      // Actualizează dropdown-urile
+      ['eTeam','edTeam'].forEach(sid=>{
+        const sel=document.getElementById(sid);if(!sel)return;
+        const opt=[...sel.options].find(o=>o.value===String(editingTeamId));
+        if(opt)opt.textContent=name+(note?' — '+note:'');
+      });
+      document.querySelectorAll('#empFil option[value="'+editingTeamId+'"]').forEach(o=>o.textContent=name);
+    }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+    return;
+  }
+
+  // ── CREARE echipă nouă ──
+  const nid=String(nextTN++);
+  const finalName=name||('Team '+nid);
+  const newTeam={id:nid,name:finalName,type:'shift',note,refDate:null};
+  teams.push(newTeam);
+  if(!cu.isSuperAdmin&&cu.role==='admin'){
+    cu.adminTeams=cu.adminTeams||[];
+    cu.adminTeams.push(nid);
+    await gsCall({action:'updateUser',user:cu});
+    const idx=users.findIndex(u=>u.id===cu.id);
+    if(idx>-1)users[idx]=cu;
+  }
+  try{await gsCall({action:'saveTeams',teams});cacheLocal();}catch{}
+  ['eTeam','edTeam'].forEach(sid=>{const o=document.createElement('option');o.value=nid;o.textContent=finalName+(note?' — '+note:'');document.getElementById(sid).appendChild(o);});
+  const fo=document.createElement('option');fo.value=nid;fo.textContent=finalName;document.getElementById('empFil').appendChild(fo);
+  closeMod('teamMod');toast('✅ '+finalName+' creat!','ok');renderATeams();
+}
+async function delTeam(tid){
+  if(users.filter(u=>u.team===tid).length>0){toast('⚠ Mută mai întâi toți membrii!','err');return;}
+  const tDel=getTeam(tid);
+  if(!confirm('Ștergi '+tDisplayName(tDel)+'?'))return;
+  teams=teams.filter(t=>t.id!==tid);
+  try{await gsCall({action:'saveTeams',teams});cacheLocal();toast('🗑 Team '+tid+' șters.','ok');renderATeams();}
+  catch(e){toast('⚠ Eroare','err');}
+}
+
+function openCfg(tid){cfgTid=tid;const t=getTeam(tid);document.getElementById('cfgTitle').textContent='⚙️ Ciclu ture — Team '+tid;document.getElementById('cfgRef').value=t.refDate||'';prevCfg();openMod('cfgMod');}
+function prevCfg(){
+  const ref=document.getElementById('cfgRef').value,p=document.getElementById('cfgPrev');
+  if(!ref){p.innerHTML='<span style="color:var(--mut)">Selectează o dată de referință.</span>';return;}
+  const fk={id:cfgTid,type:'shift',refDate:ref};const today=new Date();today.setHours(0,0,0,0);
+  let h='<div style="font-weight:600;color:var(--txt);margin-bottom:8px">Previzualizare — 8 zile de azi:</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  for(let i=0;i<8;i++){const d=new Date(today);d.setDate(today.getDate()+i);h+=`<div style="text-align:center;min-width:42px"><div style="font-size:11px;color:var(--mut)">${DRO[d.getDay()]}<br>${d.getDate()}</div>${chip(getShift(fk,d))}</div>`;}
+  p.innerHTML=h+'</div>';
+}
+async function saveCfg(){
+  const ref=document.getElementById('cfgRef').value;if(!ref){toast('Selectează o dată!','err');return;}
+  getTeam(cfgTid).refDate=ref;
+  try{await gsCall({action:'saveTeams',teams});cacheLocal();closeMod('cfgMod');toast('✅ Ciclu salvat!','ok');renderATeams();renderCal();}
+  catch(e){toast('⚠ Eroare','err');}
+}
+
+// ═══════════════════════════════════════════════════
+//  ADMINS PAGE (super-admin only)
+// ═══════════════════════════════════════════════════
+function renderAdmins(){
+  if(!cu||cu.role!=='admin')return;
+  // superAdmin sees all admins; local admin sees only admins whose teams overlap their scope
+  const sc=scopeTeams();
+  const admins=cu.isSuperAdmin
+    ? users.filter(u=>u.role==='admin')
+    : users.filter(u=>u.role==='admin'&&!u.isSuperAdmin&&u.adminTeams&&u.adminTeams.some(t=>sc&&sc.includes(t)));
+  const tb=document.getElementById('adminsTb');
+  tb.innerHTML=admins.map(a=>{
+    const badge=a.isSuperAdmin?'<span class="sadmin-badge">⭐ Super Admin</span>':'<span class="admin-badge">🛡 Admin</span>';
+    const teamsLabel=a.isSuperAdmin?'<span style="color:var(--mut);font-size:12px">Toate echipele</span>':
+      (a.adminTeams&&a.adminTeams.length?a.adminTeams.map(tid=>{const t=getTeam(tid);return t?`<span class="scope-tag">Team ${t.id}</span>`:''}).join(' '):'<span style="color:var(--ngt);font-size:12px">Nicio echipă</span>');
+    const emailLabel=a.adminEmail?`<span style="font-size:12px;color:var(--dim)">${a.adminEmail}</span>`:'<span style="font-size:12px;color:var(--mut)">—</span>';
+    const isSelf=a.id===cu.id;
+    const actions=isSelf?'<span style="font-size:12px;color:var(--mut)">Contul tău</span>':`<div class="abs"><button class="btn bgh bsm" onclick="openEditAdmin(${a.id})">✏️</button>${a.id!==1?`<button class="btn bdn bsm" onclick="delAdmin(${a.id})">✕</button>`:''}</div>`;
+    return`<tr><td><div class="erow">${av(a)}<span class="ename">${a.name}</span></div></td><td style="font-size:12px;color:var(--mut)">${a.user}</td><td>${badge}</td><td style="display:flex;gap:5px;flex-wrap:wrap;padding-top:14px">${teamsLabel}</td><td>${emailLabel}</td><td>${actions}</td></tr>`;
+  }).join('');
+}
+
+let editAdminId=null;
+function openAdminMod(){
+  editAdminId=null;
+  document.getElementById('adminModTitle').textContent='🛡️ Admin nou';
+  ['adFn','adLn','adU','adEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('adDays').value=21;
+  if(document.getElementById('adPin'))document.getElementById('adPin').value='';
+  document.getElementById('adP').value='';
+  populateAdminTeamChecks(null);
+  document.getElementById('adSuper').checked=false;
+  // Hide super checkbox for local admins (only superAdmin can create superAdmins)
+  document.getElementById('superAdminWrap').style.display=cu.isSuperAdmin?'block':'none';
+  openMod('adminMod');
+}
+function openEditAdmin(id){
+  editAdminId=id;
+  const a=users.find(u=>u.id===id);if(!a){toast('Admin negăsit!','err');return;}
+  document.getElementById('adminModTitle').textContent='✏️ Editare — '+a.name;
+  const parts=a.name.split(' ');
+  document.getElementById('adFn').value=parts[0]||'';
+  document.getElementById('adLn').value=parts.slice(1).join(' ')||'';
+  document.getElementById('adU').value=a.user;
+  document.getElementById('adP').value='';
+  document.getElementById('adEmail').value=a.adminEmail||'';
+  document.getElementById('adDays').value=a.leaveDays||21;
+  if(document.getElementById('adPin'))document.getElementById('adPin').value='';
+  const superChk=document.getElementById('adSuper');
+  if(superChk)superChk.checked=!!a.isSuperAdmin;
+  const superWrap=document.getElementById('superAdminWrap');
+  if(superWrap)superWrap.style.display=cu.isSuperAdmin?'block':'none';
+  const teamsWrap=document.getElementById('adTeamsWrap');
+  if(teamsWrap)teamsWrap.style.display=a.isSuperAdmin?'none':'block';
+  populateAdminTeamChecks(a.adminTeams||[]);
+  openMod('adminMod');
+}
+function populateAdminTeamChecks(selected){
+  const wrap=document.getElementById('adTeamsCheck');
+  // Super-admin sees all teams; local admin only sees their scoped teams
+  const availableTeams=cu.isSuperAdmin?teams:scopedTeams();
+  wrap.innerHTML=availableTeams.filter(t=>t.type==='shift').map(t=>{
+    const checked=selected&&(selected.includes(t.id)||selected.includes(String(t.id)))?'checked':'';
+    return`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;background:var(--sur2);border-radius:6px;border:1px solid var(--brd)">
+      <input type="checkbox" value="${t.id}" ${checked} style="width:15px;height:15px;accent-color:var(--acl)">
+      <span style="font-size:13px">${tDisplayName(t)}${t.note?' — '+t.note:''}</span></label>`;
+  }).join('')+
+  (availableTeams.find(t=>t.id==='white')?`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;background:var(--sur2);border-radius:6px;border:1px solid var(--brd)">
+    <input type="checkbox" value="white" ${selected&&selected.includes('white')?'checked':''} style="width:15px;height:15px;accent-color:var(--acl)">
+    <span style="font-size:13px">Team White</span></label>`:'');
+}
+function getCheckedTeams(){
+  return Array.from(document.querySelectorAll('#adTeamsCheck input:checked')).map(i=>i.value);
+}
+async function saveAdmin(){
+  const fn=document.getElementById('adFn').value.trim();
+  const ln=document.getElementById('adLn').value.trim();
+  const user=document.getElementById('adU').value.trim();
+  const pass=document.getElementById('adP').value;
+  const email=document.getElementById('adEmail').value.trim();
+  const adminTeams=getCheckedTeams();
+  if(!fn||!ln||!user){toast('Completează Prenume, Nume și Username!','err');return;}
+  const btn=document.getElementById('saveAdminBtn');btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  try{
+    if(editAdminId){
+      const a=users.find(u=>u.id===editAdminId);if(!a)throw new Error('Not found');
+      const isSuper=document.getElementById('adSuper').checked;
+      a.name=fn+' '+ln;a.user=user;a.adminEmail=email;a.adminTeams=isSuper?[]:adminTeams;a.isSuperAdmin=isSuper;
+      if(pass)a.pass=pass;
+      await gsCall({action:'updateUser',user:a});cacheLocal();
+      toast('✅ Admin actualizat!','ok');
+    }else{
+      if(!pass){toast('Introdu o parolă!','err');btn.innerHTML='💾 Salvează';btn.disabled=false;return;}
+      if(users.find(u=>u.user===user)){toast('Username deja existent!','err');btn.innerHTML='💾 Salvează';btn.disabled=false;return;}
+      const isSuper=document.getElementById('adSuper').checked;
+      const days=parseInt(document.getElementById('adDays').value)||21;
+      const adPin=document.getElementById('adPin')?document.getElementById('adPin').value:'';
+      const newAdmin={id:Date.now(),user,pass,role:'admin',name:fn+' '+ln,team:null,type:'admin',leaveDays:days,isSuperAdmin:isSuper,adminEmail:email,adminTeams:isSuper?[]:adminTeams,pin:adPin};
+      const res=await gsCall({action:'addUser',user:newAdmin});
+      if(res.ok===false)throw new Error(res.error);
+      users.push(newAdmin);cacheLocal();
+      toast('✅ Admin '+fn+' '+ln+' adăugat!','ok');
+    }
+    closeMod('adminMod');renderAdmins();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+  btn.innerHTML='💾 Salvează';btn.disabled=false;
+}
+async function delAdmin(id){
+  if(!confirm('Ștergi acest admin?'))return;
+  const res=await gsCall({action:'deleteUser',id});
+  if(res.ok===false){toast('⚠ Eroare','err');return;}
+  users=users.filter(u=>u.id!==id);cacheLocal();toast('🗑 Admin șters.','ok');renderAdmins();
+}
+
+// ═══════════════════════════════════════════════════
+//  PONTAJ
+// ═══════════════════════════════════════════════════
+let pontaje=[];
+let pontajTimerInterval=null;
+let pinBuffer='';
+let pinAction=null; // 'in' or 'out'
+
+function loadPontaje(data){
+  pontaje=data.pontaje||[];
+}
+
+function getMyActivePontaj(){
+  const d=new Date();
+  const today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  // Check in-memory pontaje array first
+  const fromArr=pontaje.find(p=>String(p.uid)===String(cu.id)&&!p.outTime&&p.date===today);
+  if(fromArr)return fromArr;
+  // Fallback: check localStorage for active pontaj (survives refresh before Sheets sync)
+  try{
+    const stored=JSON.parse(localStorage.getItem('itc_active_pontaj'));
+    if(stored&&String(stored.uid)===String(cu.id)&&stored.date===today){
+      // Verify it's not stale - if more than 16h ago, clear it
+      if(stored.inISO){
+        const age=(new Date()-new Date(stored.inISO))/3600000;
+        if(age>16){localStorage.removeItem('itc_active_pontaj');return null;}
+      }
+      return{id:stored.id,uid:stored.uid,date:stored.date,inTime:stored.inTime,inISO:stored.inISO||null,outTime:null,_fromLocalStorage:true};
+    }else if(stored){
+      // Stale entry from different day/user - clear it
+      localStorage.removeItem('itc_active_pontaj');
+    }
+  }catch{}
+  return null;
+}
+
+function startPontajDash(){
+  if(!gpsData){
+    toast('📍 Apasă "Permite locația GPS" în pagina Pontaj mai întâi!','err');
+    // Still allow - navigate to pontaj page for GPS
+    nav('pontaj');
+    return;
+  }
+  // Use same flow as pontaj page but render PIN in a simple prompt
+  const pin=prompt('Introdu PIN-ul tău (4 cifre):');
+  if(pin===null)return; // cancelled
+  if(cu.pin&&String(cu.pin).length>0&&pin!==String(cu.pin)){
+    toast('❌ PIN incorect!','err');return;
+  }
+  pinAction='in';
+  doPontajIn();
+}
+function endPontajDash(){
+  const pin=prompt('Introdu PIN-ul tău pentru ieșire:');
+  if(pin===null)return;
+  if(cu.pin&&String(cu.pin).length>0&&pin!==String(cu.pin)){
+    toast('❌ PIN incorect!','err');return;
+  }
+  pinAction='out';
+  doPontajOut();
+}
+
+function renderDashPontaj(){
+  const box=document.getElementById('dashPontajBox');
+  if(!box)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayS=toSLocal(today); // LOCAL date to match pontaj.date
+  console.log('[DashPontaj] Today local:', todayS);
+  const sh=uShift(cu,today);
+  const active=getMyActivePontaj();
+  const todayDone=pontaje.filter(p=>String(p.uid)===String(cu.id)&&p.date===todayS&&p.outTime);
+
+  let statusHtml='';
+  let btnHtml='';
+
+  if(active){
+    const since=active.inTime;
+    const sinceLabel=active.date&&active.date!==todayS?`${active.date} ora ${since}`:since;
+    statusHtml=`<div style="font-size:13px;color:var(--acl);font-weight:600">✅ Ești în tură din <strong>${sinceLabel}</strong></div>
+    <div class="timer-active" id="dashTimer" style="font-size:24px;margin:4px 0">00:00:00</div>`;
+    btnHtml=`<button class="pontaj-btn pontaj-btn-out" style="margin-top:8px" onclick="endPontajDash()">
+      ⏹ Ies din tură
+    </button>`;
+    // Clear any existing dash timer before starting new one
+    if(window._dashTimerInt)clearInterval(window._dashTimerInt);
+    setTimeout(()=>{
+      function upd(){
+        const tel=document.getElementById('dashTimer');
+        if(!tel){clearInterval(window._dashTimerInt);return;}
+        const now=new Date();
+        // Handle cross-midnight: if inTime > current time, it started yesterday
+        const base=new Date(todayS+'T'+since);
+        let diff=Math.floor((now-base)/1000);
+        if(diff<0)diff+=86400;
+        // Cap at 24h to avoid 24:xx:xx display bug
+        if(diff>86400)diff=diff%86400;
+        const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+        tel.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+      }
+      upd();
+      window._dashTimerInt=setInterval(upd,1000);
+    },100);
+  }else if(todayDone.length){
+    const last=todayDone[todayDone.length-1];
+    statusHtml=`<div style="font-size:13px;color:var(--fre)">✓ Pontaj înregistrat azi (${todayS}): <strong>${last.inTime} → ${last.outTime}</strong> (${last.duration||calcDur(last.inTime,last.outTime)})</div>`;
+    btnHtml=`<button class="btn bgh bsm" style="margin-top:8px" onclick="nav('pontaj')">📋 Vezi istoricul pontajelor</button>`;
+  }else{
+    // Not yet punched in today - show big button if has a shift
+    const shiftInfo=sh==='F'?'💤 Zi liberă — nu e necesar pontaj':`Tura de azi: <strong style="color:${sh==='D'?'var(--day)':'var(--ngt)'}">${shiftLbl(sh)}</strong>`;
+    statusHtml=`<div style="font-size:13px;color:var(--dim)">${shiftInfo}</div>`;
+    if(sh!=='F'&&sh!=='LEAVE'&&sh!=='PEND'){
+      btnHtml=`<button class="pontaj-btn pontaj-btn-in" style="margin-top:8px;max-width:320px" onclick="startPontajDash()">
+        ▶ Intru în tură
+      </button>`;
+    }
+  }
+
+  box.innerHTML=`<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="ctitle" style="margin:0">📍 Pontaj azi</div>
+      <div id="dashGpsTxt" style="font-size:11px;color:var(--mut)">📡 GPS...</div>
+    </div>
+    ${statusHtml}
+    ${btnHtml}
+  </div>`;
+  updateGpsUI();
+}
+
+function renderPontaj(){
+  if(!cu)return;
+  // Reload from Sheets silently to get fresh data
+  gsGet('loadAll').then(d=>{
+    if(d&&d.pontaje){pontaje=d.pontaje;cacheLocal();renderMyPontaje();}
+  }).catch(()=>{});
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayS=toSLocal(today); // LOCAL date
+  const sh=uShift(cu,today);
+  const shLabel=shiftLbl(sh);
+
+  // Shift info
+  document.getElementById('pontajShiftInfo').innerHTML=
+    `<div style="font-size:13px;color:var(--dim)">Azi — <strong style="color:var(--txt)">${shLabel}</strong></div>`;
+
+  // GPS — use global gpsData (already requested at login)
+  updateGpsUI();
+
+  const active=getMyActivePontaj();
+  const btnIn=document.getElementById('btnIn');
+  const btnOut=document.getElementById('btnOut');
+  const statusEl=document.getElementById('pontajStatus');
+  const timerEl=document.getElementById('pontajTimer');
+
+  if(active){
+    // In tură
+    const sinceStr=active.date&&active.date!==toS(today)?`${active.date} ora ${active.inTime}`:active.inTime;
+    statusEl.innerHTML=`<span style="color:var(--acl);font-weight:600">✅ Ești în tură din ${sinceStr}</span>`;
+    btnIn.style.display='none';
+    btnOut.style.display='flex';
+    btnOut.disabled=false;
+    timerEl.style.display='block';
+    startTimer(active.inTime, active.inISO||null);
+  }else{
+    // Not in
+    const todayDone=pontaje.filter(p=>String(p.uid)===String(cu.id)&&p.date===todayS&&p.outTime);
+    if(todayDone.length>0){
+      const last=todayDone[todayDone.length-1];
+      statusEl.innerHTML=`<span style="color:var(--mut)">✓ Ai pontaj înregistrat azi (${todayS}): ${last.inTime} → ${last.outTime}</span>`;
+    }else{
+      statusEl.innerHTML='<span style="color:var(--mut)">Nu ești în tură momentan.</span>';
+    }
+    btnIn.style.display='flex';
+    btnIn.disabled=false;
+    btnOut.style.display='none';
+    timerEl.style.display='none';
+    if(pontajTimerInterval){clearInterval(pontajTimerInterval);pontajTimerInterval=null;}
+  }
+
+  // My recent pontaje
+  renderMyPontaje();
+}
+
+function startTimer(inTimeStr, inISO){
+  if(pontajTimerInterval)clearInterval(pontajTimerInterval);
+  // Use full ISO datetime if available, otherwise construct from today+time
+  const baseDate=inISO?new Date(inISO):new Date(new Date().toISOString().slice(0,10)+'T'+inTimeStr+':00');
+  function update(){
+    const diff=Math.max(0,Math.floor((new Date()-baseDate)/1000));
+    const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+    const el=document.getElementById('pontajTimer');
+    if(el)el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  update();
+  pontajTimerInterval=setInterval(update,1000);
+}
+
+function renderMyPontaje(){
+  const myP=pontaje.filter(p=>String(p.uid)===String(cu.id)).slice(-10).reverse();
+  const el=document.getElementById('myPontajList');
+  if(!myP.length){el.innerHTML='<div style="font-size:13px;color:var(--mut)">Nicio înregistrare.</div>';return;}
+  el.innerHTML=myP.map(p=>{
+    const dur=p.outTime?calcDur(p.inTime,p.outTime):'<span class="badge-active">Activ</span>';
+    const loc=p.gpsIn?`<a href="https://maps.google.com/?q=${p.gpsIn}" target="_blank" style="font-size:11px;color:var(--acl)">📍 Hartă</a>`:'—';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--brd);font-size:13px;flex-wrap:wrap;gap:4px">
+      <span style="color:var(--dim)">${p.date}</span>
+      <span style="color:var(--txt);font-weight:600">${p.inTime} → ${p.outTime||'...'}</span>
+      <span style="color:var(--acl)">${dur}</span>
+      ${loc}
+    </div>`;
+  }).join('');
+}
+
+function calcDur(inT, outT){
+  if(!inT||!outT)return'—';
+  const today=new Date().toISOString().slice(0,10);
+  const a=new Date(today+'T'+inT),b=new Date(today+'T'+outT);
+  let diff=Math.floor((b-a)/1000);
+  if(diff<0)diff+=86400; // trecut de miezul nopții
+  const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60);
+  return h+'h '+String(m).padStart(2,'0')+'m';
+}
+
+// ── PIN ───────────────────────────────────────────────────────
+function startPontaj(){
+  if(!gpsData){
+    document.getElementById('gpsWarning').style.display='block';
+    toast('📍 Apasă mai întâi "Permite locația GPS"!','err');
+    return; // BLOCK - GPS required
+  }
+  document.getElementById('gpsWarning').style.display='none';
+  pinAction='in';
+  showPin('Introdu PIN-ul pentru intrare în tură');
+}
+function endPontaj(){
+  pinAction='out';
+  showPin('Introdu PIN-ul pentru ieșire din tură');
+}
+function showPin(title){
+  pinBuffer='';
+  document.getElementById('pinTitle').textContent=title;
+  document.getElementById('pinErr').style.display='none';
+  document.getElementById('pinModal').style.display='block';
+  updatePinDots();
+}
+function pinKey(k){
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=k;
+  updatePinDots();
+  if(pinBuffer.length===4)setTimeout(confirmPin,300);
+}
+function pinClear(){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();}
+function pinCancel(){pinBuffer='';document.getElementById('pinModal').style.display='none';}
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('pd'+i).classList.toggle('filled',i<pinBuffer.length);
+  }
+}
+async function confirmPin(){
+  if(cu.pin&&String(cu.pin).length>0){
+    if(pinBuffer!==String(cu.pin)){
+      document.getElementById('pinErr').style.display='block';
+      pinBuffer='';updatePinDots();return;
+    }
+  }
+  // No PIN set = allow without verification (no warning toast)
+  document.getElementById('pinModal').style.display='none';
+  pinBuffer='';
+  if(pinAction==='in')await doPontajIn();
+  else await doPontajOut();
+}
+
+async function doPontajIn(){
+  const now=new Date();
+  // Use LOCAL date to avoid UTC timezone issues
+  const date=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  const time=now.toTimeString().slice(0,5);
+  const inISO=now.toISOString(); // full datetime for accurate timer
+  const gpsStr=gpsData?`${gpsData.lat},${gpsData.lng}`:'';
+  const newP={id:Date.now(),uid:cu.id,name:cu.name,team:cu.team||'admin',type:cu.type,date,inTime:time,inISO,outTime:null,gpsIn:gpsStr,gpsOut:'',duration:''};
+  console.log('[Pontaj] Adding:', JSON.stringify(newP));
+  console.log('[Pontaj] GS_URL:', GS_URL);
+  document.getElementById('btnIn').disabled=true;
+  try{
+    const res=await gsCall({action:'addPontaj',pontaj:newP});
+    pontaje.push(newP);
+    // Save active pontaj ID locally for persistence across refresh
+    const localToday=new Date();
+    const localTodayStr=localToday.getFullYear()+'-'+String(localToday.getMonth()+1).padStart(2,'0')+'-'+String(localToday.getDate()).padStart(2,'0');
+    localStorage.setItem('itc_active_pontaj',JSON.stringify({id:newP.id,uid:cu.id,date:localTodayStr,inTime:newP.inTime,inISO:newP.inISO}));
+    cacheLocal();
+    toast('✅ Intrare înregistrată: '+time,'ok');
+    renderPontaj();renderDashPontaj();
+    // Verify save after 3 seconds
+    setTimeout(async()=>{
+      try{
+        const verify=await gsGet('loadAll');
+        if(verify.pontaje){
+          const saved=verify.pontaje.find(p=>String(p.id)===String(newP.id));
+          if(!saved){toast('⚠ Pontajul nu s-a salvat în Sheets! Redeploy scriptul GAS.','err');}
+          else{pontaje=verify.pontaje;cacheLocal();console.log('[Pontaj] Verified saved OK');}
+        }
+      }catch{}
+    },3000);
+  }catch(e){
+    console.error('[Pontaj IN error]',e);
+    toast('⚠ '+e.message,'err');
+    document.getElementById('btnIn').disabled=false;
+  }
+}
+
+async function doPontajOut(){
+  const active=getMyActivePontaj();if(!active)return;
+  const now=new Date();
+  const time=now.toTimeString().slice(0,5);
+  const gpsStr=gpsData?`${gpsData.lat},${gpsData.lng}`:'';
+  const dur=calcDur(active.inTime,time);
+  // If active came from localStorage fallback, find real id
+  const activeId=active.id;
+  document.getElementById('btnOut').disabled=true;
+  try{
+    await gsCall({action:'updatePontaj',id:activeId,updates:{outTime:time,gpsOut:gpsStr,duration:dur}});
+    const idx=pontaje.findIndex(p=>String(p.id)===String(activeId));
+    if(idx>-1){
+      pontaje[idx].outTime=time;
+      pontaje[idx].gpsOut=gpsStr;
+      pontaje[idx].duration=dur;
+    }
+    cacheLocal();
+    if(pontajTimerInterval){clearInterval(pontajTimerInterval);pontajTimerInterval=null;}
+    localStorage.removeItem('itc_active_pontaj');
+    toast('✅ Ieșire înregistrată: '+time+' | Durata: '+dur,'ok');
+    renderPontaj();renderDashPontaj();
+    setTimeout(async()=>{
+      try{
+        const verify=await gsGet('loadAll');
+        if(verify.pontaje){pontaje=verify.pontaje;cacheLocal();}
+      }catch{}
+    },3000);
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');document.getElementById('btnOut').disabled=false;}
+}
+
+// ── CONDICĂ ADMIN ─────────────────────────────────────────────
+function renderCondica(){
+  // Populate team filter
+  const fil=document.getElementById('condicaTeamFil');
+  const prevSel=[...fil.selectedOptions].map(o=>o.value);
+  fil.innerHTML='<option value="all">Toate echipele</option><option value="admin">Admini</option>';
+  scopedTeams().forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=tDisplayName(t);fil.appendChild(o);});
+  if(prevSel.length>0&&!prevSel.includes('all')){
+    [...fil.options].forEach(o=>{o.selected=prevSel.includes(o.value);});
+  }else{fil.options[0].selected=true;}
+
+  const selectedOpts=[...fil.selectedOptions].map(o=>o.value);
+  const teamF=selectedOpts.includes('all')||selectedOpts.length===0?'all':selectedOpts;
+  const fromF=document.getElementById('condicaFrom').value;
+  const toF=document.getElementById('condicaTo').value;
+
+  let rows=[...pontaje];
+  // Scope filter - superadmin sees all, local admin sees their teams + admins
+  const sc=scopeTeams();
+  if(sc!==null){
+    rows=rows.filter(p=>{
+      if(!p.team||p.team==='admin'||p.type==='admin')return true;
+      return sc.map(String).includes(String(p.team));
+    });
+  }
+  if(teamF!=='all'){
+    const teams2=Array.isArray(teamF)?teamF:[teamF];
+    rows=rows.filter(p=>{
+      if(teams2.includes('admin'))return!p.team||p.team==='admin'||p.type==='admin';
+      return teams2.some(t=>String(p.team)===String(t));
+    });
+  }
+  if(fromF)rows=rows.filter(p=>p.date>=fromF);
+  if(toF)rows=rows.filter(p=>p.date<=toF);
+  // Show active (no outTime) first, then sorted by date desc
+  rows.sort((a,b)=>{
+    if(!a.outTime&&b.outTime)return-1;
+    if(a.outTime&&!b.outTime)return 1;
+    return b.date.localeCompare(a.date)||b.inTime.localeCompare(a.inTime);
+  });
+
+  const el=document.getElementById('condicaList');
+  if(!rows.length){el.innerHTML='<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">Nicio înregistrare în perioada selectată.</div>';return;}
+
+  el.innerHTML=rows.map(p=>{
+    const u=users.find(x=>x.id===p.uid);
+    const uName=u?u.name:p.name||'—';
+    const t=getTeam(String(p.team));
+    const tName=t?tDisplayName(t):(p.team||'—');
+    const isModified=!!p.modifiedBy;
+    const modTag=isModified?`<span class="modified-tag" title="Modificat: ${p.modReason||'—'}">(m)</span>`:'';
+    const status=p.outTime?`<span class="badge-in">${p.duration||calcDur(p.inTime,p.outTime)}</span>`:'<span class="badge-active">Activ</span>';
+    const locIn=p.gpsIn?`<a href="https://maps.google.com/?q=${p.gpsIn}" target="_blank" style="font-size:11px;color:var(--acl)">📍</a>`:'—';
+    const inDisplay=`<span style="font-size:13px;color:var(--fre);font-weight:600">${p.inTime}</span>${p.origIn&&p.origIn!==p.inTime?`<span style="font-size:10px;color:var(--mut);text-decoration:line-through;margin-left:3px">${p.origIn}</span>`:''}`;
+    const outDisplay=p.outTime?`<span style="font-size:13px;color:var(--ngt);font-weight:600">${p.outTime}</span>${p.origOut&&p.origOut!==p.outTime?`<span style="font-size:10px;color:var(--mut);text-decoration:line-through;margin-left:3px">${p.origOut}</span>`:''}`:'<span style="color:var(--ngt)">—</span>';
+    return`<div class="condica-row">
+      <div><div style="font-weight:600;color:var(--txt);font-size:13px">${uName} ${modTag}</div><div style="font-size:11px;color:var(--mut)">${tName}</div></div>
+      <div style="font-size:12px;color:var(--dim)">${p.date}</div>
+      <div>${inDisplay}</div>
+      <div>${outDisplay}</div>
+      <div>${status}</div>
+      <div style="display:flex;align-items:center;gap:4px">${locIn}<button class="btn bgh bsm" style="padding:3px 7px;font-size:11px" onclick="openEditPontaj('${p.id}')">✏️</button><button class="btn bdn bsm" style="padding:3px 7px;font-size:11px" onclick="deletePontaj('${p.id}')">🗑</button></div>
+    </div>`;
+  }).join('');
+}
+
+// ── ALERT PONTAJ ACTIONS ─────────────────────────────────────
+async function addPontajFromAlert(uid, date, uname, shift){
+  const defaultIn=shift==='N'?'19:00':shift==='D'?'07:00':'07:00';
+  const defaultOut=shift==='N'?'07:00':shift==='D'?'19:00':'16:00';
+  const inTime=prompt(`Adaugă pontaj pentru ${uname} pe ${date}\nOra intrare (HH:MM):`, defaultIn);
+  if(!inTime||!inTime.match(/^\d{2}:\d{2}$/)){if(inTime!==null)toast('Format invalid! Folosește HH:MM','err');return;}
+  const outTime=prompt(`Ora ieșire (HH:MM):`, defaultOut);
+  if(!outTime||!outTime.match(/^\d{2}:\d{2}$/)){if(outTime!==null)toast('Format invalid! Folosește HH:MM','err');return;}
+  const reason='Adăugat retroactiv de admin';
+  const uObj=users.find(u=>String(u.id)===String(uid));
+  const newP={
+    id:Date.now(),uid:uObj?uObj.id:uid,name:uname,
+    team:uObj?.team||'',type:uObj?.type||'',
+    date,inTime,outTime,duration:calcDur(inTime,outTime),
+    gpsIn:'',gpsOut:'',
+    modifiedBy:cu.name,modReason:reason,modAt:new Date().toISOString()
+  };
+  try{
+    const res=await gsCall({action:'addPontaj',pontaj:newP});
+    if(res&&res.ok===false)throw new Error(res.error||'Unknown action: addPontaj — redeploy GAS necesar!');
+    pontaje.push(newP);cacheLocal();
+    toast(`✅ Pontaj adăugat pentru ${uname} pe ${date}!`,'ok');
+    detectAlerts();renderCondica();
+  }catch(e){
+    if(e.message.includes('addPontaj')||e.message.includes('Unknown')){
+      toast('⚠ Scriptul GAS nu are acțiunea addPontaj — fă redeploy din Setări!','err');
+    }else{toast('⚠ Eroare: '+e.message,'err');}
+  }
+}
+
+function editAlertPontaj(pid){
+  openEditPontaj(pid);
+}
+
+async function dismissAlert(uid, date){
+  try{
+    const key='itc_dismissed_alerts';
+    const dismissed=JSON.parse(localStorage.getItem(key)||'[]');
+    const entry=String(uid)+'_'+date;
+    if(!dismissed.includes(entry)){dismissed.push(entry);}
+    localStorage.setItem(key,JSON.stringify(dismissed));
+    // Sync dismissed list to Sheets via admin user object
+    if(cu&&cu.role==='admin'){
+      cu.dismissedAlerts=dismissed;
+      await gsCall({action:'updateUser',user:cu});
+      cacheLocal();
+    }
+    detectAlerts();
+  }catch(e){console.warn('dismissAlert error',e);}
+}
+
+function isAlertDismissed(uid, date){
+  try{
+    // Check both localStorage and cu.dismissedAlerts (synced from Sheets)
+    const fromUser=cu&&cu.dismissedAlerts?cu.dismissedAlerts:[];
+    const fromLocal=JSON.parse(localStorage.getItem('itc_dismissed_alerts')||'[]');
+    // Merge both sources
+    const all=[...new Set([...fromUser,...fromLocal])];
+    // Sync back to localStorage if different
+    if(fromUser.length>fromLocal.length){localStorage.setItem('itc_dismissed_alerts',JSON.stringify(all));}
+    return all.includes(String(uid)+'_'+date);
+  }catch{return false;}
+}
+
+async function deleteAlertPontaj(pid){
+  const p=pontaje.find(x=>String(x.id)===String(pid));
+  if(!p)return;
+  const u=users.find(x=>String(x.id)===String(p.uid));
+  if(!confirm(`Ștergi pontajul pentru ${u?u.name:'angajat'}?\n${p.date} | ${p.inTime} → ${p.outTime||'activ'}`))return;
+  try{
+    const res=await gsCall({action:'deletePontaj',id:p.id});
+    if(res.ok===false)throw new Error(res.error);
+    pontaje=pontaje.filter(x=>String(x.id)!==String(pid));
+    cacheLocal();
+    toast('🗑 Pontaj șters.','ok');
+    detectAlerts();renderCondica();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+}
+
+// ── DELETE PONTAJ (ADMIN) ────────────────────────────────────
+async function deletePontaj(pid){
+  const p=pontaje.find(x=>String(x.id)===String(pid));
+  if(!p){toast('Pontaj negăsit!','err');return;}
+  const u=users.find(x=>x.id===p.uid);
+  const uName=u?u.name:'—';
+  if(!confirm(`Ștergi pontajul lui ${uName}?\n${p.date} | ${p.inTime} → ${p.outTime||'neînchis'}\n\nAceastă acțiune nu poate fi anulată.`))return;
+  try{
+    const res=await gsCall({action:'deletePontaj',id:p.id});
+    if(res&&res.ok===false){
+      if(res.error&&res.error.includes('Unknown')){
+        toast('⚠ GAS nu are deletePontaj — fă redeploy din Setări!','err');return;
+      }
+      throw new Error(res.error);
+    }
+    pontaje=pontaje.filter(x=>String(x.id)!==String(pid));
+    cacheLocal();
+    toast('🗑 Pontaj șters.','ok');
+    detectAlerts();renderCondica();
+  }catch(e){toast('⚠ '+e.message,'err');}
+}
+
+// ── ALERT PONTAJ ACTIONS ─────────────────────────────────────
+async function deleteAlertPontaj(pid){
+  const p=pontaje.find(x=>String(x.id)===String(pid));
+  if(!p)return;
+  const u=users.find(x=>String(x.id)===String(p.uid));
+  if(!confirm(`Ștergi pontajul pentru ${u?u.name:'angajat'}?\n${p.date} | ${p.inTime} → ${p.outTime||'activ'}`))return;
+  try{
+    const res=await gsCall({action:'deletePontaj',id:p.id});
+    if(res.ok===false)throw new Error(res.error);
+    pontaje=pontaje.filter(x=>String(x.id)!==String(pid));
+    cacheLocal();
+    toast('🗑 Pontaj șters.','ok');
+    detectAlerts();renderCondica();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+}
+
+// ── DELETE PONTAJ (ADMIN) ────────────────────────────────────
+async function deletePontaj(pid){
+  if(!pid||pid==='undefined'){toast('ID pontaj invalid!','err');return;}
+  if(!pontaje.length){
+    const d=await gsGet('loadAll').catch(()=>null);
+    if(d&&d.pontaje){pontaje=d.pontaje;cacheLocal();}
+  }
+  const p=pontaje.find(x=>String(x.id)===String(pid));
+  if(!p){toast('Pontaj negăsit — reîncarcă datele','err');return;}
+  const u=users.find(x=>x.id===p.uid);
+  const uName=u?u.name:'angajat';
+  if(!confirm(`Ștergi pontajul pentru ${uName}?\n${p.date} | ${p.inTime} → ${p.outTime||'activ'}\n\nAceastă acțiune nu poate fi anulată.`))return;
+  try{
+    const res=await gsCall({action:'deletePontaj',id:p.id});
+    if(res&&res.ok===false){
+      if(res.error&&res.error.includes('Unknown')){
+        toast('⚠ GAS nu are deletePontaj — fă redeploy din Setări!','err');return;
+      }
+      throw new Error(res.error);
+    }
+    pontaje=pontaje.filter(x=>String(x.id)!==String(pid));
+    cacheLocal();
+    toast('🗑 Pontaj șters.','ok');
+    detectAlerts();renderCondica();
+  }catch(e){toast('⚠ '+e.message,'err');}
+}
+
+// ── EDIT PONTAJ (ADMIN) ──────────────────────────────────────
+let editingPontajId=null;
+function openEditPontaj(pid){
+  if(!pid||pid==='undefined'){toast('ID pontaj invalid!','err');return;}
+  const p=pontaje.find(x=>String(x.id)===String(pid));
+  if(!p){
+    toast('Pontaj negăsit — reîncarcă datele (🔄)','err');
+    // Try refresh then retry
+    gsGet('loadAll').then(d=>{if(d&&d.pontaje){pontaje=d.pontaje;cacheLocal();
+      const p2=pontaje.find(x=>String(x.id)===String(pid));
+      if(p2)openEditPontaj(pid);else toast('Pontaj negăsit în Sheets','err');
+    }}).catch(()=>{});
+    return;
+  }
+  editingPontajId=p.id;
+  const u=users.find(x=>x.id===p.uid);
+  document.getElementById('editPontajInfo').innerHTML=
+    `<strong style="color:var(--txt)">${u?u.name:'—'}</strong><br>
+    Original: intrare <strong>${p.origIn||p.inTime}</strong>${p.origOut||p.outTime?` | ieșire <strong>${p.origOut||p.outTime}</strong>`:''}
+    ${p.modifiedBy?`<br><span style="color:var(--lv);font-size:11px">Ultima modificare: ${p.modReason||'—'}</span>`:''}`;
+  document.getElementById('epDate').value=p.date;
+  document.getElementById('epIn').value=p.inTime;
+  document.getElementById('epOut').value=p.outTime||'';
+  document.getElementById('epReason').value='';
+  openMod('editPontajMod');
+}
+
+async function saveEditPontaj(){
+  const p=pontaje.find(x=>String(x.id)===String(editingPontajId));
+  if(!p)return;
+  const newIn=document.getElementById('epIn').value;
+  const newOut=document.getElementById('epOut').value;
+  const newDate=document.getElementById('epDate').value;
+  const reason=document.getElementById('epReason').value.trim();
+  if(!newIn){toast('Ora de intrare e obligatorie!','err');return;}
+  const btn=document.getElementById('saveEditPontajBtn');
+  btn.innerHTML='<div class="spin"></div>';btn.disabled=true;
+  try{
+    const updates={
+      date:newDate,
+      inTime:newIn,
+      outTime:newOut||null,
+      duration:newOut?calcDur(newIn,newOut):'',
+      origIn:p.origIn||p.inTime,   // preserve original
+      origOut:p.origOut||(p.outTime||null),
+      modifiedBy:cu.name,
+      modReason:reason||'Modificare admin',
+      modAt:new Date().toISOString()
+    };
+    const res=await gsCall({action:'updatePontaj',id:p.id,updates});
+    if(res.ok===false)throw new Error(res.error);
+    Object.assign(p,updates);
+    cacheLocal();
+    closeMod('editPontajMod');
+    toast('✅ Pontaj modificat!','ok');
+    renderCondica();
+  }catch(e){toast('⚠ Eroare: '+e.message,'err');}
+  btn.innerHTML='💾 Salvează';btn.disabled=false;
+}
+
+// ── ALERTE NECONCORDANȚE ──────────────────────────────────────
+// alertMonth: 'current' sau 'prev'
+let alertMonthMode='current';
+
+function switchAlertMonth(mode){
+  alertMonthMode=mode;
+  detectAlerts();
+}
+
+function detectAlerts(){
+  const banner=document.getElementById('alertBanner');
+  if(!banner||cu.role!=='admin'||cu.isLeader)return; // Only admin (non-leader) sees alerts
+
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayS=toSLocal(today);
+
+  // Determine month range
+  let startD,endD,monthLabel;
+  if(alertMonthMode==='prev'){
+    // Luna anterioară
+    const y=today.getMonth()===0?today.getFullYear()-1:today.getFullYear();
+    const m=today.getMonth()===0?11:today.getMonth()-1;
+    startD=new Date(y,m,1);
+    endD=new Date(y,m+1,0); // last day of prev month
+    monthLabel=MRO[m]+' '+y;
+  }else{
+    // Luna curentă — de la 1 până azi (exclus azi)
+    startD=new Date(today.getFullYear(),today.getMonth(),1);
+    endD=new Date(today);endD.setDate(endD.getDate()-1); // ieri
+    monthLabel=MRO[today.getMonth()]+' '+today.getFullYear();
+  }
+
+  const alerts=[];
+  const warnings=[];
+
+  // Iterate each day in range
+  const d=new Date(startD);
+  while(d<=endD){
+    const dStr=toSLocal(d); // LOCAL date - avoid UTC offset issues
+    const dayLabel=DRO[d.getDay()]+' '+d.getDate()+'.'+String(d.getMonth()+1).padStart(2,'0');
+
+    // Include admin users in alerts too if they have pontaj obligations
+    const scopedEmps=scopedUsers();
+    scopedEmps.forEach(u=>{
+      const sh=uShift(u,d);
+      const shouldWork=sh==='D'||sh==='N'||sh==='LV';
+      if(!shouldWork)return;
+      // L-V: don't flag on public holidays (shift workers may still work)
+      if(sh==='LV'&&isHoliday(d))return;
+
+      const dayPontaje=pontaje.filter(p=>p.uid===u.id&&p.date===dStr);
+
+      // 1. Lipsă pontaj complet
+      if(!dayPontaje.length){
+        if(!isAlertDismissed(u.id,dStr))alerts.push({
+          msg:`${u.name} — <strong>${dayLabel}</strong> — lipsă pontaj (${shiftLbl(sh)})`,
+          uid:u.id, date:dStr, type:'missing', uname:u.name, shift:sh
+        });
+        return;
+      }
+
+      dayPontaje.forEach(p=>{
+        // 2. Fără ieșire
+        if(!p.outTime){
+          alerts.push({
+            msg:`${u.name} — <strong>${dayLabel}</strong> — ieșire neînregistrată (intrare: ${p.inTime})`,
+            uid:u.id, date:dStr, pontajId:p.id, type:'noexit', uname:u.name, inTime:p.inTime
+          });
+          return;
+        }
+        const dur=calcDurH(p.inTime,p.outTime);
+        // 3. Durată suspectă — prag diferit per tip tură
+        const isLV=(sh==='LV');
+        const shortMin=isLV?6:10;  // LV: sub 6h suspect; Ture: sub 10h suspect
+        const longMax=isLV?10:14;  // LV: peste 10h suspect; Ture: peste 14h suspect
+        if(dur<shortMin){
+          warnings.push({
+            msg:`${u.name} — <strong>${dayLabel}</strong> — durată scurtă: ${Math.round(dur*10)/10}h (min ${shortMin}h)`,
+            uid:u.id, date:dStr, pontajId:p.id, type:'short', uname:u.name
+          });
+        }else if(dur>longMax){
+          warnings.push({
+            msg:`${u.name} — <strong>${dayLabel}</strong> — durată mare: ${Math.round(dur*10)/10}h (max ${longMax}h)`,
+            uid:u.id, date:dStr, pontajId:p.id, type:'long', uname:u.name
+          });
+        }
+        // 4. Ieșire anticipată - only for shift workers, not L-V
+        if(sh==='D'){
+          const [oh]=p.outTime.split(':').map(Number);
+          if(oh<17)warnings.push({
+            msg:`${u.name} — <strong>${dayLabel}</strong> — ieșire anticipată: ${p.outTime} (tură Zi, normal 19:00)`,
+            uid:u.id, date:dStr, pontajId:p.id, type:'early', uname:u.name
+          });
+        }else if(sh==='N'){
+          const [oh]=p.outTime.split(':').map(Number);
+          if(oh>=5&&oh<7)warnings.push({
+            msg:`${u.name} — <strong>${dayLabel}</strong> — ieșire anticipată: ${p.outTime} (tură Noapte, normal 07:00)`,
+            uid:u.id, date:dStr, pontajId:p.id, type:'early', uname:u.name
+          });
+        }
+        // L-V: don't flag early exit (flexible schedule)
+      });
+    });
+    d.setDate(d.getDate()+1);
+  }
+
+  // Month switcher buttons
+  const btnCurStyle=alertMonthMode==='current'?'background:var(--agw);color:var(--acl);border-color:var(--acl)':'';
+  const btnPrvStyle=alertMonthMode==='prev'?'background:var(--agw);color:var(--acl);border-color:var(--acl)':'';
+  const monthBtns=`<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:12px;color:var(--mut)">Perioadă:</span>
+    <button class="btn bgh bsm" style="${btnCurStyle}" onclick="switchAlertMonth('current')">${MRO[today.getMonth()]} ${today.getFullYear()}</button>
+    <button class="btn bgh bsm" style="${btnPrvStyle}" onclick="switchAlertMonth('prev')">Luna anterioară</button>
+  </div>`;
+
+  if(!alerts.length&&!warnings.length){
+    banner.innerHTML=monthBtns+`<div style="font-size:13px;color:var(--fre);padding:8px 0">✅ Nicio neconcordanță detectată în ${monthLabel}.</div>`;
+    banner.style.display='block';
+    return;
+  }
+
+  let html=monthBtns;
+  if(alerts.length){
+    html+=`<div class="alert-banner" style="margin-bottom:10px">
+      <div class="alert-banner-title">🔴 ${alerts.length} ${alerts.length>1?'neconcordanțe critice':'neconcordanță critică'} — ${monthLabel}</div>
+      ${alerts.slice(0,6).map(a=>{const isObj=typeof a==='object';const msg=isObj?a.msg:a;const btn=isObj&&a.type==='missing'?`<span style="display:flex;gap:3px;flex-shrink:0"><button class="btn bac bsm" style="padding:3px 8px;font-size:11px" onclick="addPontajFromAlert('${a.uid}','${a.date}','${a.uname}','${a.shift}')">+ Adaugă</button><button class="btn bgh bsm" style="padding:3px 7px;font-size:11px" onclick="dismissAlert('${a.uid}','${a.date}')" title="Ignoră această alertă">✕</button></span>`:isObj&&a.pontajId?`<span style="display:flex;gap:3px;flex-shrink:0"><button class="btn bgh bsm" style="padding:3px 7px;font-size:11px" onclick="editAlertPontaj('${a.pontajId}')">✏️</button><button class="btn bdn bsm" style="padding:3px 7px;font-size:11px" onclick="deleteAlertPontaj('${a.pontajId}')">🗑</button></span>`:'';return`<div class="alert-item" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:6px"><div class="alert-dot"></div><span>${msg}</span></div>${btn}</div>`;}).join('')}
+      ${alerts.length>6?`<div style="font-size:12px;color:var(--mut);margin-top:6px">+ ${alerts.length-6} mai multe — verifică Condica</div>`:''}
+      <button class="btn bgh bsm" style="margin-top:10px" onclick="nav('condica')">📋 Deschide Condica</button>
+    </div>`;
+  }
+  if(warnings.length){
+    html+=`<div class="alert-banner alert-warn">
+      <div class="alert-banner-title">⚠️ ${warnings.length} ${warnings.length>1?'avertismente':'avertisment'} — ${monthLabel}</div>
+      ${warnings.slice(0,5).map(w=>{const isObj=typeof w==='object';const msg=isObj?w.msg:w;const btn=isObj&&w.pontajId?`<span style="display:flex;gap:3px;flex-shrink:0"><button class="btn bgh bsm" style="padding:3px 7px;font-size:11px" onclick="editAlertPontaj('${w.pontajId}')">✏️</button><button class="btn bdn bsm" style="padding:3px 7px;font-size:11px" onclick="deleteAlertPontaj('${w.pontajId}')">🗑</button></span>`:'';return`<div class="alert-item" style="justify-content:space-between"><div style="display:flex;align-items:center;gap:6px"><div class="alert-dot"></div><span>${msg}</span></div>${btn}</div>`;}).join('')}
+      ${warnings.length>5?`<div style="font-size:12px;color:var(--mut);margin-top:6px">+ ${warnings.length-5} mai multe</div>`:''}
+      <button class="btn bgh bsm" style="margin-top:8px" onclick="nav('condica')">📋 Deschide Condica</button>
+    </div>`;
+  }
+  banner.innerHTML=html;
+  banner.style.display='block';
+}
+
+function calcDurH(inT,outT){
+  if(!inT||!outT)return 0;
+  const today=new Date().toISOString().slice(0,10);
+  const a=new Date(today+'T'+inT),b=new Date(today+'T'+outT);
+  let diff=(b-a)/3600000;
+  if(diff<0)diff+=24;
+  return diff;
+}
+
+// ── EXPORT PDF ────────────────────────────────────────────────
+function exportCondicaPDF(){
+  const fromF=document.getElementById('condicaFrom').value;
+  const toF=document.getElementById('condicaTo').value;
+  const teamF=document.getElementById('condicaTeamFil').value;
+
+  let rows=[...pontaje];
+  const sc=scopeTeams();
+  if(sc!==null)rows=rows.filter(p=>sc.map(String).includes(String(p.team)));
+  if(teamF!=='all')rows=rows.filter(p=>String(p.team)===String(teamF));
+  if(fromF)rows=rows.filter(p=>p.date>=fromF);
+  if(toF)rows=rows.filter(p=>p.date<=toF);
+  // Show active (no outTime) first, then sorted by date desc
+  rows.sort((a,b)=>{
+    if(!a.outTime&&b.outTime)return-1;
+    if(a.outTime&&!b.outTime)return 1;
+    return b.date.localeCompare(a.date)||b.inTime.localeCompare(a.inTime);
+  });
+
+  const perioadaLabel=(fromF||'început')+' → '+(toF||'prezent');
+  const teamLabel=teamF==='all'?'Toate echipele':tDisplayName(getTeam(teamF))||teamF;
+
+  const tRows=rows.map(p=>{
+    const u=users.find(x=>x.id===p.uid);
+    const uName=u?u.name:p.name||'—';
+    const t=getTeam(String(p.team));
+    const tName=t?tDisplayName(t):(p.team||'—');
+    const dur=p.outTime?(p.duration||calcDur(p.inTime,p.outTime)):'În tură';
+    const gps=p.gpsIn||'—';
+    const inLabel=p.inTime+(p.origIn&&p.origIn!==p.inTime?' <span style="color:#92400e;font-size:10px">(c)</span>':'');
+    const outLabel=p.outTime?(p.outTime+(p.origOut&&p.origOut!==p.outTime?' <span style="color:#92400e;font-size:10px">(c)</span>':'')):'—';
+    return`<tr>
+      <td>${uName}</td><td>${tName}</td><td>${p.date}</td>
+      <td style="color:#166534;font-weight:600">${inLabel}</td>
+      <td style="color:#991b1b;font-weight:600">${outLabel}</td>
+      <td>${dur}</td><td style="font-size:11px">${gps}</td>
+    </tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Condică Pontaj ITC Logistic</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:12px;margin:20px;color:#111;}
+    h1{font-size:18px;margin-bottom:4px;color:#1a5c2a;}
+    .meta{font-size:12px;color:#555;margin-bottom:16px;}
+    table{width:100%;border-collapse:collapse;}
+    th{background:#1a5c2a;color:white;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+    td{padding:7px 10px;border-bottom:1px solid #e5e7eb;}
+    tr:nth-child(even){background:#f9fafb;}
+    .footer{margin-top:20px;font-size:11px;color:#888;border-top:1px solid #e5e7eb;padding-top:10px;}
+    @media print{body{margin:10px;}}
+  </style></head><body>
+  <h1>ITC Logistic — Condică Pontaj</h1>
+  <div class="meta">Perioadă: ${perioadaLabel} | Echipă: ${teamLabel} | Generat: ${new Date().toLocaleString('ro-RO')}</div>
+  <table>
+    <thead><tr><th>Angajat</th><th>Echipă</th><th>Data</th><th>Intrare</th><th>Ieșire</th><th>Durată</th><th>Locație GPS</th></tr></thead>
+    <tbody>${tRows}</tbody>
+  </table>
+  <div class="footer">Total înregistrări: ${rows.length} | ITC Logistic România | itc-logistic.ro</div>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ═══════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════
+async function updateGsUrl(){
+  const url=document.getElementById('gsUrlInp').value.trim();
+  if(!url){toast('URL gol!','err');return;}
+  // NOTE: Schimbarea URL-ului din interfață afectează DOAR acest browser
+  // Pentru a schimba URL-ul pentru TOȚI utilizatorii, 
+  // actualizează fișierul HTML și re-uploadează pe GitHub/Netlify
+  toast('⚠ URL schimbat doar local. Pentru toți utilizatorii, actualizează fișierul HTML.','err');
+  GS_URL=url;
+  try{await gsGet('loadAll');document.getElementById('gsStatusWrap').innerHTML='<span class="conn-ok">● Conectat</span>';toast('✅ URL actualizat!','ok');}
+  catch{document.getElementById('gsStatusWrap').innerHTML='<span class="conn-no">● Eroare conexiune</span>';toast('⚠ Nu s-a putut conecta','err');}
+}
+
+function saveEJ(){
+  EJ={key:document.getElementById('ejK').value.trim(),svc:document.getElementById('ejS').value.trim(),tpl:document.getElementById('ejT').value.trim(),to:document.getElementById('ejE').value.trim()};
+  localStorage.setItem('itc_ej_k',EJ.key);localStorage.setItem('itc_ej_s',EJ.svc);
+  localStorage.setItem('itc_ej_t',EJ.tpl);localStorage.setItem('itc_ej_e',EJ.to);
+  if(EJ.key&&EJ.svc&&EJ.tpl){emailjs.init(EJ.key);document.getElementById('ejStatusTxt').textContent='● Configurat ✓';toast('✅ EmailJS salvat!','ok');}
+  else{toast('⚠ Completează toate câmpurile EmailJS','err');}
+}
+
+async function sendEmail(data, toOverride){
+  if(!EJ.key||!EJ.svc||!EJ.tpl)return;
+  try{
+    emailjs.init(EJ.key);
+    const si=data.shiftT==='N'?'Noapte (2z/schimb)':data.shiftT==='MIX'?'Zi + Noapte':data.shiftT==='LV'?'L-V':'Zi (1z/schimb)';
+    const dest=toOverride||EJ.to;
+    await emailjs.send(EJ.svc,EJ.tpl,{to_email:dest,subject:data.subject||'Cerere concediu nouă',employee_name:data.empName,team:data.team,start_date:data.start,end_date:data.end,days:data.days,shift_type:si,leave_type:data.type,note:data.note||'—'});
+  }catch(e){console.warn('Email err',e);}
+}
+
+async function testEmail(){
+  if(!EJ.key){toast('Salvează mai întâi setările!','err');return;}
+  emailjs.init(EJ.key);
+  try{await emailjs.send(EJ.svc,EJ.tpl,{to_email:EJ.to,employee_name:'Test Angajat',team:'Team 1',start_date:'2026-06-01',end_date:'2026-06-04',days:3,shift_type:'Zi + Noapte',leave_type:'Odihnă',note:'Test'});toast('✅ Email de test trimis!','ok');}
+  catch(e){toast('⚠ Eroare email: '+(e.text||e.message),'err');}
+}
+
+// ═══════════════════════════════════════════════════
+//  APPS SCRIPT (v2 - individual operations)
+// ═══════════════════════════════════════════════════
+const APPS_SCRIPT=`// ITC Logistic ShiftManager v6 — Google Apps Script
+// Deploy: Web App | Execute as: Me | Access: Anyone
+
+const SS_NAME = 'ITC_ShiftManager';
+
+function getOrCreate() {
+  const files = DriveApp.getFilesByName(SS_NAME);
+  if (files.hasNext()) return SpreadsheetApp.open(files.next());
+  return SpreadsheetApp.create(SS_NAME);
+}
+
+function getDataSheet() {
+  const ss = getOrCreate();
+  let sh = ss.getSheetByName('Data');
+  if (!sh) sh = ss.insertSheet('Data');
+  return sh;
+}
+
+function readAll() {
+  try {
+    const val = getDataSheet().getRange(1,1).getValue();
+    if (!val) return { users: [], teams: [], leaves: [], pontaje: [] };
+    return JSON.parse(val);
+  } catch(e) { return { users: [], teams: [], leaves: [], pontaje: [] }; }
+}
+
+function writeAll(data) {
+  getDataSheet().getRange(1,1).setValue(JSON.stringify(data));
+}
+
+function doGet(e) {
+  try {
+    const action = (e.parameter && e.parameter.action) || 'loadAll';
+    const data = readAll();
+    if (action === 'loadAll') return out(data);
+    if (e.parameter && e.parameter.data) {
+      const payload = JSON.parse(decodeURIComponent(e.parameter.data));
+      return out(handleAction(payload, data));
+    }
+    return out({ ok: true });
+  } catch(err) {
+    return out({ ok: false, error: err.toString() });
+  }
+}
+
+function handleAction(payload, data) {
+  const action = payload.action;
+
+  if (action === 'saveAll') {
+    writeAll({ users: payload.users, teams: payload.teams, leaves: payload.leaves, pontaje: payload.pontaje||[] });
+    return { ok: true };
+  }
+  if (action === 'addUser') {
+    data.users = data.users || [];
+    data.users.push(payload.user);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'updateUser') {
+    data.users = (data.users || []).map(u => u.id === payload.user.id ? payload.user : u);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'deleteUser') {
+    data.users = (data.users || []).filter(u => u.id !== payload.id);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'addLeave') {
+    data.leaves = data.leaves || [];
+    data.leaves.push(payload.leave);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'updateLeave') {
+    data.leaves = (data.leaves || []).map(l => {
+      if (l.id !== payload.id) return l;
+      const updated = { ...l, status: payload.status, anote: payload.anote };
+      if (payload.start !== undefined) updated.start = payload.start;
+      if (payload.end !== undefined) updated.end = payload.end;
+      if (payload.days !== undefined) updated.days = payload.days;
+      if (payload.type !== undefined) updated.type = payload.type;
+      if (payload.note !== undefined) updated.note = payload.note;
+      return updated;
+    });
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'deleteLeave') {
+    data.leaves = (data.leaves || []).filter(l => l.id !== payload.id);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'saveTeams') {
+    data.teams = payload.teams;
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'addPontaj') {
+    data.pontaje = data.pontaje || [];
+    data.pontaje.push(payload.pontaj);
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'updatePontaj') {
+    data.pontaje = (data.pontaje || []).map(p => {
+      if (String(p.id) !== String(payload.id)) return p;
+      return { ...p, ...payload.updates };
+    });
+    writeAll(data);
+    return { ok: true };
+  }
+  if (action === 'deletePontaj') {
+    data.pontaje = (data.pontaje || []).filter(p => String(p.id) !== String(payload.id));
+    writeAll(data);
+    return { ok: true };
+  }
+
+  return { ok: false, error: 'Unknown action: ' + action };
+}
+
+function out(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const data = readAll();
+    const result = handleAction(payload, data);
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+`;
+
+function copyScript(){
+  navigator.clipboard.writeText(APPS_SCRIPT).then(()=>{
+    ['copyOk','copyOk2'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='inline';setTimeout(()=>el.style.display='none',2500);}});
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  MOBILE + MODALS
+// ═══════════════════════════════════════════════════
+let _condicaRefreshInt=null;
+function startCondicaRefresh(){
+  if(_condicaRefreshInt)clearInterval(_condicaRefreshInt);
+  _condicaRefreshInt=setInterval(async()=>{
+    const active=document.getElementById('page-condica');
+    if(!active||!active.classList.contains('active')){clearInterval(_condicaRefreshInt);_condicaRefreshInt=null;return;}
+    try{const d=await gsGet('loadAll');if(d&&d.pontaje){pontaje=d.pontaje;cacheLocal();renderCondica();}}catch{}
+  },60000); // refresh every 60 seconds
+}
+
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('ovbg').classList.toggle('show');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('ovbg').classList.remove('show');}
+function openMod(id){document.getElementById(id).classList.add('open');}
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.movl').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// INIT
+const tiso=new Date().toISOString().slice(0,10);
+document.getElementById('lvS').value=tiso;document.getElementById('lvE').value=tiso;
+document.getElementById('lvS').min=tiso;document.getElementById('lvE').min=tiso;
+// Set default condica date range (last 30 days)
+const d30=new Date();d30.setDate(d30.getDate()-30);
+document.getElementById('condicaFrom').value=d30.toISOString().slice(0,10);
+document.getElementById('condicaTo').value=tiso;
+init();
+</script>
+</body>
+</html>
