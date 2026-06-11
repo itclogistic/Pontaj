@@ -941,7 +941,12 @@ async function gsCall(payload){
   console.log('[GS] URL length:',url.length,'action:',payload.action);
   // Try GET first
   try{
-    const res=await fetch(url,{redirect:'follow'});
+    const res=await fetch(url,{
+  method:'GET',
+  redirect:'follow',
+  mode:'cors',
+  cache:'no-cache'
+});
     const txt=await res.text();
     console.log('[GS] Response:',txt.slice(0,200));
     if(txt.trim().startsWith('<')){
