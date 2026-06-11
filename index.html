@@ -915,7 +915,7 @@ let users=[],teams=[],leaves=[];
 const _now=new Date();let cu=null,calY=_now.getFullYear(),calM=_now.getMonth(),revId=null,editUid=null,cfgTid=null,nextTN=5;
 // GS_URL: ALWAYS use hardcoded URL — single source of truth
 // To change URL for ALL users, update this file and redeploy
-const GS_URL_DEFAULT='https://script.google.com/macros/s/AKfycbyOPDz3WgUp6NU9c4UxKk0jEshB3V7hH-a7Q_tYY4v5mNAwxqpjjd9p_QkdKZLBDMm3/exec';
+const GS_URL_DEFAULT='https://script.google.com/macros/s/AKfycbwC8PhaiR_nNcBzgL9DTv8UEwnZBtDhyaXScmKctbf-HlPDAjIplHLMUb0p-HqvHqDd/exec';
 let GS_URL=GS_URL_DEFAULT; // ignores localStorage - all users use same URL
 localStorage.removeItem('itc_gs'); // clear any old overrides
 let EJ={key:localStorage.getItem('itc_ej_k')||'KdTbgMtON8unIjQh2',svc:localStorage.getItem('itc_ej_s')||'service_s4i8rwm',tpl:localStorage.getItem('itc_ej_t')||'template_atpr3md',to:localStorage.getItem('itc_ej_e')||'a.radan@itc-logistic.ro'};
