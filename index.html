@@ -3482,7 +3482,12 @@ function readAll() {
 }
 
 function writeAll(data) {
-  getDataSheet().getRange(1,1).setValue(JSON.stringify(data));
+
+  const json = JSON.stringify(data);
+
+  Logger.log("JSON LENGTH: " + json.length);
+
+  getDataSheet().getRange(1,1).setValue(json);
 }
 
 function doGet(e) {
@@ -3571,11 +3576,27 @@ function handleAction(payload, data) {
     return { ok: true };
   }
   if (action === 'addPontaj') {
-    data.pontaje = data.pontaje || [];
-    data.pontaje.push(payload.pontaj);
+
+  data.pontaje = data.pontaje || [];
+  data.pontaje.push(payload.pontaj);
+
+  try{
     writeAll(data);
-    return { ok: true };
+
+    return {
+      ok:true,
+      count:data.pontaje.length
+    };
+
+  }catch(err){
+
+    return {
+      ok:false,
+      error:String(err)
+    };
+
   }
+}
   if (action === 'updatePontaj') {
     data.pontaje = (data.pontaje || []).map(p => {
       if (String(p.id) !== String(payload.id)) return p;
